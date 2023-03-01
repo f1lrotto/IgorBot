@@ -1,0 +1,34 @@
+{
+  "dependencies": {
+    "axios": "^0.27.2",
+    "cheerio": "^1.0.0-rc.12",
+    "discord.js": "^13.6.0",
+    "dotenv": "^16.0.0",
+    "express": "^4.18.1",
+    "moment": "^2.29.3",
+    "mongoose": "^6.3.3",
+    "morgan": "^1.10.0",
+    "node-cron": "^3.0.0",
+    "nodemon": "^2.0.16",
+    "uuid": "^8.3.2"
+  },
+  "name": "dennikn-alert-bot",
+  "description": "Server that sends every 15 minutes new articles on Minuta po minute through discord webhooks",
+  "version": "1.0.0",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js",
+    "dev": "cd src && nodemon app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/f1lrotto/DENNIK-N-DISCORD-ALERT.git"
+  },
+  "author": "Filip Hupka",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/f1lrotto/DENNIK-N-DISCORD-ALERT/issues"
+  },
+  "homepage": "https://github.com/f1lrotto/DENNIK-N-DISCORD-ALERT#readme"
+}
