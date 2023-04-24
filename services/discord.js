@@ -1,18 +1,23 @@
 const { WebhookClient } = require("discord.js");
 
-const makeDiscordMessage = require("./../controller/discord.send");
+const {makeDennikDiscordMessage, makeZsskDiscordMessage} = require("./../controller/discord.send");
 
 require("dotenv").config();
 
-const DISCORD_URL = process.env.DISCORD_URL;
-const DISCORD_USERNAME = "Igor";
-const DISCORD_AVATAR_URL = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT7hdRR2Z7DLOus03pQvQsq1XRwmsxGMAJ61A&usqp=CAU";
+const DENNIK_DISCORD_URL = process.env.DENNIK_DISCORD_URL;
+const DENNIK_DISCORD_USERNAME = "Igor";
+const DENNIK_DISCORD_AVATAR_URL = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT7hdRR2Z7DLOus03pQvQsq1XRwmsxGMAJ61A&usqp=CAU";
 
-const webhookClient = new WebhookClient({ url: DISCORD_URL });
+const ZSSK_DISCORD_URL = process.env.ZSSK_DISCORD_URL;
+const ZSSK_DISCORD_USERNAME = ""; // TODO MILAN
+const ZSSK_DISCORD_AVATAR_URL = "";
+
+const dennikWebhookClient = new WebhookClient({ url: DENNIK_DISCORD_URL });
+const zsskWebhookClient = new WebhookClient({ url: ZSSK_DISCORD_URL });
 
 function sendDennikDiscordMessage(newArticles) {
   if (newArticles.length != 0) {
-    const newArticleArray = makeDiscordMessage(newArticles);
+    const newArticleArray = makeDennikDiscordMessage(newArticles);
     const numMessages = Math.ceil(newArticleArray.length / 10);
     var countStart = 0;
     var countEnd = 9;
@@ -22,10 +27,10 @@ function sendDennikDiscordMessage(newArticles) {
       }
 
       message = newArticleArray.slice(countStart, countEnd).join(' ')
-      webhookClient.send({
+      dennikWebhookClient.send({
         content: message,
-        username: DISCORD_USERNAME,
-        avatarURL: DISCORD_AVATAR_URL,
+        username: DENNIK_DISCORD_USERNAME,
+        avatarURL: DENNIK_DISCORD_AVATAR_URL,
       });
       countStart += 10;
       countEnd += 10;
@@ -33,4 +38,9 @@ function sendDennikDiscordMessage(newArticles) {
   }
 }
 
-module.exports = sendDennikDiscordMessage;
+function sendZsskDiscordMessage() { }; // TODO MILAN
+
+module.exports = {
+  sendDennikDiscordMessage,
+  sendZsskDiscordMessage,
+};

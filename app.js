@@ -20,6 +20,7 @@ cron.schedule("*/1 * * * *", () => {
 cron.schedule("*/15 * * * *", () => {
   console.log("Running Discord Cron Job");
   //scraperController.sendDennik();
+  //scraperController.sendZssk();
 });
 
 PORT = process.env.PORT || 8000;

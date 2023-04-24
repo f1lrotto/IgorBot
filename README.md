@@ -27,9 +27,9 @@ You need to create a `.env` file in the projects root directory
 In this file you should include:
 - `PORT` - on which the application will run on
 - `MONGO_URI` - a connect URI to your mongoDB database
-- `DISCORD_URL` - webhook link to your discord server
-- `DISCORD_USERNAME` - name of your discord bot
-- `DISCORD_AVATAR_URL` - URL for your profile picture
+- `DENNIK_DISCORD_URL` - webhook link to your discord server
+- `DENNIK_DISCORD_USERNAME` - name of your discord bot
+- `DENNIK_DISCORD_AVATAR_URL` - URL for your profile picture
 
 ### Start the application 
 ```
