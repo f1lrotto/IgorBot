@@ -1,11 +1,9 @@
-const scraper = require("../scraper/scraper");
+const scraper = require("../dennikScraper/scraper");
 const articlesDatabase = require("../models/articles.mongo");
-const { sendDiscordMessage } = require("../services/discord");
-
 
 const BASE_URL_DN = "https://dennikn.sk/minuta/dolezite";
 
-const scrapeJob = async () => {
+const dennikScrapeJob = async () => {
   const articles = [];
 
   const scrapedOverview = await scraper.scrapeOverview(BASE_URL_DN);
@@ -17,7 +15,7 @@ const scrapeJob = async () => {
   return articles;
 };
 
-const saveToDatabase = async (articles) => {
+const saveDennikToDatabase = async (articles) => {
   // save to database, but if already in mongo database, don't save
   articles.forEach(async (article) => {
     const articleExists = await articlesDatabase.exists({ link: article.link });
@@ -27,7 +25,7 @@ const saveToDatabase = async (articles) => {
   });
 };
 
-const getUnsentArticles = async () => {
+const getDennikUnsentArticles = async () => {
   // get all articles that were not sent yet and set wasSent to true
   const articles = await articlesDatabase.find({ wasSent: false });
   articles.forEach(async (article) => {
@@ -40,19 +38,8 @@ const getUnsentArticles = async () => {
   return articles;
 };
 
-const runScraper = async () => {
-  const articles = await scrapeJob();
-  await saveToDatabase(articles);
-  // send the unsent articles
-};
-
-const send = async () => {
-  const articles = await getUnsentArticles();
-  sendDiscordMessage(articles);
-};
-
-
 module.exports = {
-  runScraper,
-  send
+  dennikScrapeJob,
+  saveDennikToDatabase,
+  getDennikUnsentArticles,
 };

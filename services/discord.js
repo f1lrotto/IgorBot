@@ -10,7 +10,7 @@ const DISCORD_AVATAR_URL = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9
 
 const webhookClient = new WebhookClient({ url: DISCORD_URL });
 
-function sendDiscordMessage(newArticles) {
+function sendDennikDiscordMessage(newArticles) {
   if (newArticles.length != 0) {
     const newArticleArray = makeDiscordMessage(newArticles);
     const numMessages = Math.ceil(newArticleArray.length / 10);
@@ -33,4 +33,4 @@ function sendDiscordMessage(newArticles) {
   }
 }
 
-module.exports = sendDiscordMessage;
+module.exports = sendDennikDiscordMessage;

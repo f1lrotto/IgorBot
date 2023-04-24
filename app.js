@@ -2,7 +2,7 @@ const express = require("express");
 const cron = require("node-cron");
 
 const { connectMongo } = require("./services/mongo");
-const scraperController = require("./controller/scraper_controller");
+const scraperController = require("./controller/mainController");
 
 require("dotenv").config();
 
@@ -12,12 +12,14 @@ const app = express();
 
 cron.schedule("*/1 * * * *", () => {
   console.log("Running main Cron Job");
-  scraperController.runScraper();
+  scraperController.runDennikScraper();
+
+  scraperController.runZsskScraper();
 });
 
 cron.schedule("*/15 * * * *", () => {
   console.log("Running Discord Cron Job");
-  //scraperController.send();
+  //scraperController.sendDennik();
 });
 
 PORT = process.env.PORT || 8000;
