@@ -3,7 +3,7 @@ const articlesDatabase = require("../models/articles.mongo");
 const { sendDiscordMessage } = require("../services/discord");
 
 
-const BASE_URL_DN = "https://dennikn.sk/minuta/feed/?cat=2386&ref=inc";
+const BASE_URL_DN = "https://dennikn.sk/minuta/dolezite";
 
 const scrapeJob = async () => {
   const articles = [];
@@ -14,6 +14,7 @@ const scrapeJob = async () => {
     const article = await scraper.scrapeArticle(scrapedOverview[i]);
     articles.push(article);
   }
+  return articles;
 };
 
 const saveToDatabase = async (articles) => {

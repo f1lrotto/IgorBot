@@ -9,9 +9,14 @@ const scrapeOverview = async (url) => {
   const $ = cheerio.load(html);
 
   // scrape the rss feed
-  $("item").each((i, el) => {
+  $("mnt-Post-hash").each((i, el) => {
+    const card = $(el).find("div");
+    const article = card.find(".mnt-article");
+    const title = article.find("a").text() || article.find("strong").text();
+    // if the title is from strong tag, get the text from outside the tag
+    
     articles.push({
-      link: $(el).find("link").text(),
+      link: $(el).find("link").html(),
       pubDate: new Date($(el).find("pubDate").text()).toISOString(),
     });
   });

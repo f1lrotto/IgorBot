@@ -10,7 +10,7 @@ connectMongo();
 
 const app = express();
 
-cron.schedule("*/5 * * * *", () => {
+cron.schedule("*/1 * * * *", () => {
   console.log("Running main Cron Job");
   scraperController.runScraper();
 });
