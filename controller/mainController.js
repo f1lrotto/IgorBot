@@ -15,8 +15,8 @@ const sendDennik = async () => {
 
 // ZSSK SCRAPER
 const runZsskScraper = async () => {
-  const articles = await zsskScrapeJob();
-  await saveToZsskDatabase(articles);
+  const zsskTweets = await zsskScrapeJob();
+  await saveToZsskDatabase(zsskTweets);
 };
 
 const sendZssk = async () => {
