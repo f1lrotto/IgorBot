@@ -20,8 +20,8 @@ const runZsskScraper = async () => {
 };
 
 const sendZssk = async () => {
-  const articles = await getZsskUnsentArticles();
-  sendZsskDiscordMessage(articles);
+  const zsskTweets = await getZsskUnsentArticles();
+  sendZsskDiscordMessage(zsskTweets);
 };
 
 module.exports = {

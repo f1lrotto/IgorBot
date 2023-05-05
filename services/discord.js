@@ -9,8 +9,8 @@ const DENNIK_DISCORD_USERNAME = "Igor";
 const DENNIK_DISCORD_AVATAR_URL = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT7hdRR2Z7DLOus03pQvQsq1XRwmsxGMAJ61A&usqp=CAU";
 
 const ZSSK_DISCORD_URL = process.env.ZSSK_DISCORD_URL;
-const ZSSK_DISCORD_USERNAME = ""; // TODO MILAN
-const ZSSK_DISCORD_AVATAR_URL = "";
+const ZSSK_DISCORD_USERNAME = "ZSSK";
+const ZSSK_DISCORD_AVATAR_URL = "https://i.ytimg.com/vi/PzaimfxdTwg/maxresdefault.jpg";
 
 const dennikWebhookClient = new WebhookClient({ url: DENNIK_DISCORD_URL });
 const zsskWebhookClient = new WebhookClient({ url: ZSSK_DISCORD_URL });
@@ -38,7 +38,19 @@ function sendDennikDiscordMessage(newArticles) {
   }
 }
 
-function sendZsskDiscordMessage() { }; // TODO MILAN
+function sendZsskDiscordMessage(newTweets) {
+  if (newTweets.length != 0) {
+    const messages = makeZsskDiscordMessage(newTweets);
+    
+   messages.forEach(message => {
+    zsskWebhookClient.send({
+      content: message,
+      username: ZSSK_DISCORD_USERNAME,
+      avatarURL: ZSSK_DISCORD_AVATAR_URL,
+    });
+   });
+ }
+};
 
 module.exports = {
   sendDennikDiscordMessage,

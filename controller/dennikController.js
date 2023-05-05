@@ -26,17 +26,19 @@ const saveDennikToDatabase = async (articles) => {
 };
 
 const getDennikUnsentArticles = async () => {
-  // get all articles that were not sent yet and set wasSent to true
-  const articles = await articlesDatabase.find({ wasSent: false });
-  articles.forEach(async (article) => {
-    await articlesDatabase.updateOne({ _id: article._id }, { wasSent: true });
-  });
-  // sort the articles by date from oldest to newest
-  articles.sort((a, b) => {
-    return new Date(a.date) - new Date(b.date);
-  });
+  // Fetch the documents with wasSent: false and sort them by date
+  const articles = await articlesDatabase.find({ wasSent: false }).sort({ date: 1 });
+
+  // Update the wasSent flag of the fetched documents in the database
+  await articlesDatabase.updateMany(
+    { _id: { $in: articles.map((article) => article._id) } },
+    { $set: { wasSent: true } }
+  );
+
   return articles;
 };
+
+
 
 module.exports = {
   dennikScrapeJob,

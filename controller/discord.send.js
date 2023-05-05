@@ -17,6 +17,17 @@ function makeDennikDiscordMessage(newArticles) {
   return newArticleArray;
 }
 
-function makeZsskDiscordMessage() {} // TODO MILAN
+function makeZsskDiscordMessage(newTweets) {
+  const newTweetsArray = []
+
+  newTweets.forEach((tweet) => {
+    const time = moment(tweet.date).add(2, 'hours').format("Do MMM HH:mm");
+    const isKill = tweet.tweet.includes("zrazil");
+    const tweetText = isKill ? `**${tweet.tweet}**` : tweet.tweet;
+    message = `At ${time}\n${tweetText}\n${tweet.link}`;
+    newTweetsArray.push([message])
+  });
+  return newTweetsArray;
+}
 
 module.exports = {makeDennikDiscordMessage, makeZsskDiscordMessage};

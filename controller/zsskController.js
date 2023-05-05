@@ -1,4 +1,3 @@
-//TODO MILAN
 const { getPageDataWithPuppeteer } = require('../zsskScraper/scraper');
 const ZsskDatabase = require("../models/zssk.mongo");
 
@@ -26,14 +25,15 @@ const saveToZsskDatabase = async (zsskTweets) => {
 };
 
 const getZsskUnsentArticles = async () => {
-  const tweets = await ZsskDatabase.find({ wasSent: false });
-  tweets.forEach(async (tweet) => {
-    await ZsskDatabase.updateOne({ _id: tweet._id }, { wasSent: true });
-  });
-  
-  tweets.sort((a, b) => {
-    return new Date(a.date) - new Date(b.date);
-  });
+  // Fetch the documents with wasSent: false and sort them by date
+  const tweets = await ZsskDatabase.find({ wasSent: false }).sort({ date: 1 });
+
+  // Update the wasSent flag of the fetched documents in the database
+  await ZsskDatabase.updateMany(
+    { _id: { $in: tweets.map((article) => article._id) } },
+    { $set: { wasSent: true } }
+  );
+
   return tweets;
 };
 
