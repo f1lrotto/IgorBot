@@ -30,6 +30,9 @@ const articlesSchema = new mongoose.Schema(
       required: true,
     },
     theme: {
+      type: Array,
+    },
+    img: {
       type: String,
     },
     wasSent: {

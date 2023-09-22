@@ -20,7 +20,7 @@ const saveNewsToDatabase = async (articles) => {
 
 const getNewsUnsentArticles = async () => {
   // get all articles that were not sent yet and set wasSent to true
-  const articles = await articlesDatabase.find({ wasSent: true });
+  const articles = await articlesDatabase.find({ wasSent: false });
   articles.forEach(async (article) => {
     await articlesDatabase.updateOne({ _id: article._id }, { wasSent: true });
   });

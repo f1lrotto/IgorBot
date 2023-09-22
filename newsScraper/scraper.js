@@ -19,6 +19,8 @@ const scrapeOverview = async (url) => {
     const mainDiv = $(el)
     const articleId = mainDiv.attr('data-article-id');
 
+    const img = mainDiv.find('img').attr('src');
+
     // Extracting the date. If not present, we'll default to the current date in Bratislava's timezone.
     const dateElement = mainDiv.find('.article-short-side-content div a.fs-16');
     let articleDate = dateElement.length > 0 ? dateElement.text() : moment().tz("Europe/Bratislava").format("D. M. YYYY");
@@ -50,15 +52,23 @@ const scrapeOverview = async (url) => {
 
     let articleUrl = articleLink.attr('href');
 
+    if (articleUrl === undefined) {
+      articleUrl = 'https://www.sme.sk/minuta/dolezite-spravy';
+    }
+
     // Check and adjust for 'javascript: void(0);'
     if (articleUrl === 'javascript: void(0);') {
-      articleUrl = "undefined";
+      articleUrl = "https://www.sme.sk/minuta/dolezite-spravy";
     }
 
     // get the 2nd div from the footer of the card, it holds article theme
     const articleShortFooter = mainDiv.find('footer');
     // get the text of an a tag, it holds the theme
-    const theme = articleShortFooter.find('.btn.btn-s.btn-border.mb-xxs').text();
+    const theme = [];
+    articleShortFooter.find('.btn.btn-s.btn-border.mb-xxs').each((i, el) => {
+      theme.push($(el).text());
+    });
+    console.log(theme);
 
     const logData = {
       articleId,
@@ -69,8 +79,9 @@ const scrapeOverview = async (url) => {
       articleContent,
       articleUrl,
       // push the theme only if it exists
-      ...(theme && { theme }),
+      ...(theme != [] && { theme }),
       // Check if the theme matches "Vojna na Ukrajine"
+      ...(img && { img })
     };
     // push the article to the articles array
     articles.push(logData);

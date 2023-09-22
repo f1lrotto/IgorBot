@@ -9,15 +9,13 @@ const app = express();
 const PORT = process.env.PORT || 8000;
 
 function startApp() {
+  const executeJobsSequentially = async () => {
+    await controller.runNewsScraper();
+    await controller.sendNews();
+  };
 
-  controller.sendNews();
   // Schedule the jobs after everything is set up
-  cron.schedule("*/5 * * * *", () => {
-    controller.runNewsScraper();
-  });
-
-  cron.schedule("*/15 * * * *", () => {
-  });
+  cron.schedule("*/5 * * * *", executeJobsSequentially);
 
   console.log(`Server listening on port ${PORT}`);
 }
