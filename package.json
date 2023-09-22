@@ -14,6 +14,9 @@
   "name": "newsn-alert-bot",
   "description": "Server that sends every 15 minutes new articles on Minuta po minute through discord webhooks",
   "version": "1.0.0",
+    "engines": {
+    "node": "18.x"
+  },
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
