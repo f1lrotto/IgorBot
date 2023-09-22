@@ -3,6 +3,7 @@ const { newsScrapeJob, saveNewsToDatabase, getNewsUnsentArticles } = require("./
 
 // NEWS N SCRAPER
 const runNewsScraper = async () => {
+  console.log("Running news scraper");
   const articles = await newsScrapeJob();
   await saveNewsToDatabase(articles);
 };

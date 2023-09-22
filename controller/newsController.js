@@ -5,6 +5,7 @@ const BASE_URL = "https://www.sme.sk/minuta/dolezite-spravy";
 
 const newsScrapeJob = async () => {
   const articles = await scraper.scrapeOverview(BASE_URL);
+  console.log(`Scraped ${articles.length} articles`);
   return articles;
 }
 
@@ -13,6 +14,7 @@ const saveNewsToDatabase = async (articles) => {
   articles.forEach(async (article) => {
     const articleExists = await articlesDatabase.exists({ articleId: article.articleId });
     if (!articleExists) {
+      console.log(`Saving article ${article.articleId} to database`);
       await articlesDatabase.create(article);
     }
   });
@@ -20,7 +22,9 @@ const saveNewsToDatabase = async (articles) => {
 
 const getNewsUnsentArticles = async () => {
   // get all articles that were not sent yet and set wasSent to true
+  console.log("Getting unsent articles");
   const articles = await articlesDatabase.find({ wasSent: false });
+  console.log(`Found ${articles.length} unsent articles`);
   articles.forEach(async (article) => {
     await articlesDatabase.updateOne({ _id: article._id }, { wasSent: true });
   });

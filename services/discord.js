@@ -10,6 +10,7 @@ const newsWebhookClient = new WebhookClient({ url: NEWS_DISCORD_URL });
 
 async function sendNewsDiscordMessage(newArticles) {
   if (newArticles.length !== 0) {
+    console.log(`Sending ${newArticles.length} new articles to Discord`);
     const embeds = [];
     
     newArticles.forEach((article) => {
@@ -73,6 +74,7 @@ async function sendNewsDiscordMessage(newArticles) {
         .setImage(article.img)
         .setTimestamp()
         .setFooter({ text: 'Maslo', iconURL: 'https://cdn.discordapp.com/attachments/1152608374588981329/1154165287197880410/image0.jpg' });
+      console.log('Created embed');      
       embeds.push(exampleEmbed);
     });
 
@@ -82,6 +84,7 @@ async function sendNewsDiscordMessage(newArticles) {
     for (let i = 0; i < embeds.length; i += 10) {
       const current = embeds.slice(a, b);
       if (!current) break;
+      console.log(`Sending ${current.length} embeds in batch ${i / 10}`);
       await newsWebhookClient.send({
         username: NEWS_DISCORD_USERNAME,
         avatarURL: NEWS_DISCORD_AVATAR_URL,
