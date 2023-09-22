@@ -10,6 +10,7 @@ const PORT = process.env.PORT || 8000;
 
 function startApp() {
   const executeJobsSequentially = async () => {
+    console.log("Running jobs");
     await controller.runNewsScraper();
     await controller.sendNews();
   };
