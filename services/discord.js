@@ -1,46 +1,40 @@
 const { WebhookClient } = require("discord.js");
 
-const {makeDennikDiscordMessage, makeZsskDiscordMessage} = require("./../controller/discord.send");
+const send = require("../controller/discord.send");
 
 require("dotenv").config();
 
-const DENNIK_DISCORD_URL = process.env.DENNIK_DISCORD_URL;
-const DENNIK_DISCORD_USERNAME = "Igor";
-const DENNIK_DISCORD_AVATAR_URL = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT7hdRR2Z7DLOus03pQvQsq1XRwmsxGMAJ61A&usqp=CAU";
+const NEWS_DISCORD_URL = process.env.NEWS_DISCORD_URL;
+const NEWS_DISCORD_USERNAME = "KapustaKlaxon";
+const NEWS_DISCORD_AVATAR_URL = "https://i1.wp.com/www.zdrowewarzywka.pl/wp-content/uploads/2018/06/kapusta-bia%C5%82a.jpg?fit=1024%2C683&ssl=1";
 
-const ZSSK_DISCORD_URL = process.env.ZSSK_DISCORD_URL;
-const ZSSK_DISCORD_USERNAME = ""; // TODO MILAN
-const ZSSK_DISCORD_AVATAR_URL = "";
+const newsWebhookClient = new WebhookClient({ url: NEWS_DISCORD_URL });
 
-const dennikWebhookClient = new WebhookClient({ url: DENNIK_DISCORD_URL });
-const zsskWebhookClient = new WebhookClient({ url: ZSSK_DISCORD_URL });
+async function sendNewsDiscordMessage(newArticles) {
+  if (newArticles.length !== 0) {
+    const newArticleArray = send.makeNewsDiscordMessage(newArticles);
 
-function sendDennikDiscordMessage(newArticles) {
-  if (newArticles.length != 0) {
-    const newArticleArray = makeDennikDiscordMessage(newArticles);
-    const numMessages = Math.ceil(newArticleArray.length / 10);
-    var countStart = 0;
-    var countEnd = 9;
-    for (let i = 0; i < numMessages; i++) {
-      if (countEnd > newArticleArray) {
-        countEnd = newArticleArray.length;
+    for (const article of newArticleArray) {
+      if (article.length <= 2000) {
+        await newsWebhookClient.send({
+          content: article,
+          username: NEWS_DISCORD_USERNAME,
+          avatarURL: NEWS_DISCORD_AVATAR_URL,
+          embeds: [],
+        });
+
+        // Introducing a delay of 1 second between messages to avoid rate limits
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      } else {
+        console.error("Message too long!");
       }
-
-      message = newArticleArray.slice(countStart, countEnd).join(' ')
-      dennikWebhookClient.send({
-        content: message,
-        username: DENNIK_DISCORD_USERNAME,
-        avatarURL: DENNIK_DISCORD_AVATAR_URL,
-      });
-      countStart += 10;
-      countEnd += 10;
     }
   }
 }
 
-function sendZsskDiscordMessage() { }; // TODO MILAN
+
+
 
 module.exports = {
-  sendDennikDiscordMessage,
-  sendZsskDiscordMessage,
+  sendNewsDiscordMessage,
 };

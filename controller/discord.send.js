@@ -1,22 +1,37 @@
-const moment = require("moment");
+function makeNewsDiscordMessage(newArticles) {
+  const messages = [];
 
-function makeDennikDiscordMessage(newArticles) {
-  const newArticleArray = []
-  let message = `**There are ${newArticles.length} new articles on Minuta po Minute.**\n\n`
-
-  if (newArticles.length == 1) {
-    message = `**There is ${newArticles.length} new article on Minuta po Minute.**\n\n`;
+  // Create header message based on the number of articles
+  let headerMessage = `📰 **Pribudlo ${newArticles.length} nových článkov na SME!**\n\n`;
+  if (newArticles.length === 1) {
+    headerMessage = `📰 **Pribudol ${newArticles.length} nový článok na SME!**\n\n`;
   }
-  newArticleArray.push(message)
+  messages.push(headerMessage);
 
+  // Loop through each article and format its details
   newArticles.forEach((article) => {
-    const time = moment(article.time).add(2, 'hours').format("Do MMM HH:mm");
-    message = `At ${time}, **${article.headline}**\n${article.text}\n<${article.postLink}>\n\n`;
-    newArticleArray.push([message])
+    const time = `${article.articleDate} - ${article.articleTime}`;
+
+    let themeLine = '';
+    if (article.theme) {
+      themeLine = `\n**Témy:** ${article.theme}`;
+    }
+
+    let link = '';
+    if (article.articleUrl) {
+      link = `📢 **(${article.category}) [${article.headline}](<${article.articleUrl}>)**\n`;  // Added < > to prevent Discord embeds
+    } else {
+      link = `📢 **(${article.category}) ${article.headline}**\n`;
+    }
+
+    const formattedArticle = `\n\n
+🗓️ **Dátum a Čas:** ${time}
+${link}
+${article.articleContent}${themeLine}\n\n`;
+    messages.push(formattedArticle);
   });
-  return newArticleArray;
+
+  return messages;
 }
 
-function makeZsskDiscordMessage() {} // TODO MILAN
-
-module.exports = {makeDennikDiscordMessage, makeZsskDiscordMessage};
+module.exports = { makeNewsDiscordMessage };

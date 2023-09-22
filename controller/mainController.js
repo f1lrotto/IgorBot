@@ -1,32 +1,20 @@
-const { sendDennikDiscordMessage } = require("../services/discord");
-const { dennikScrapeJob, saveDennikToDatabase, getDennikUnsentArticles } = require("./dennikController");
-const { zsskScrapeJob, saveToZsskDatabase, getZsskUnsentArticles } = require("./zsskController");
+const { sendNewsDiscordMessage } = require("../services/discord");
+const { newsScrapeJob, saveNewsToDatabase, getNewsUnsentArticles } = require("./newsController");
 
-// DENNIK N SCRAPER
-const runDennikScraper = async () => {
-  const articles = await dennikScrapeJob();
-  await saveDennikToDatabase(articles);
+// NEWS N SCRAPER
+const runNewsScraper = async () => {
+  const articles = await newsScrapeJob();
+  await saveNewsToDatabase(articles);
 };
 
-const sendDennik = async () => {
-  const articles = await getDennikUnsentArticles();
-  sendDennikDiscordMessage(articles);
+const sendNews = async () => {
+  console.log("Sending news");
+  const articles = await getNewsUnsentArticles();
+  sendNewsDiscordMessage(articles);
 };
 
-// ZSSK SCRAPER
-const runZsskScraper = async () => {
-  const articles = await zsskScrapeJob();
-  await saveToZsskDatabase(articles);
-};
-
-const sendZssk = async () => {
-  const articles = await getZsskUnsentArticles();
-  sendZsskDiscordMessage(articles);
-};
 
 module.exports = {
-  runDennikScraper,
-  sendDennik,
-  runZsskScraper,
-  sendZssk,
+  runNewsScraper,
+  sendNews,
 };
