@@ -68,7 +68,6 @@ const scrapeOverview = async (url) => {
     articleShortFooter.find('.btn.btn-s.btn-border.mb-xxs').each((i, el) => {
       theme.push($(el).text());
     });
-    console.log(theme);
 
     const logData = {
       articleId,
