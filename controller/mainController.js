@@ -3,17 +3,23 @@ const { newsScrapeJob, saveNewsToDatabase, getNewsUnsentArticles } = require("./
 
 // NEWS N SCRAPER
 const runNewsScraper = async () => {
-  console.log("Running news scraper");
   const articles = await newsScrapeJob();
   await saveNewsToDatabase(articles);
-  console.log("News scraper finished");
+  console.info("News scraper finished");
+  return 0;
 };
 
 const sendNews = async () => {
-  console.log("Sending news");
+  console.info("Starting a job to send news to a discord server");
   const articles = await getNewsUnsentArticles();
+  if (articles.length === 0) {
+    console.info("No news to send, 0 unsent articles found");
+    return 1;
+  }
   sendNewsDiscordMessage(articles);
-  console.log("News sent");
+  console.info("News sent successfully");
+
+  return 0;
 };
 
 

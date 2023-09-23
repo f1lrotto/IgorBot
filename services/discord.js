@@ -10,9 +10,9 @@ const newsWebhookClient = new WebhookClient({ url: NEWS_DISCORD_URL });
 
 async function sendNewsDiscordMessage(newArticles) {
   if (newArticles.length !== 0) {
-    console.log(`Sending ${newArticles.length} new articles to Discord`);
+    console.info(`Attempting to send ${newArticles.length} new articles to Discord`);
     const embeds = [];
-    
+    console.info('Creating custom fields');
     newArticles.forEach((article) => {
       let color = '';
       let categoryUrl = '';
@@ -64,6 +64,7 @@ async function sendNewsDiscordMessage(newArticles) {
         article.articleContent = article.articleContent.replace('Mazurek', '🥚 Mazurek 🥚')
       }
 
+      console.info(`Creating embed for article ${article.articleId}-${article.headline}`)
       const exampleEmbed = new EmbedBuilder()
         .setColor(color)
         .setTitle(article.headline)
@@ -74,17 +75,18 @@ async function sendNewsDiscordMessage(newArticles) {
         .setImage(article.img)
         .setTimestamp()
         .setFooter({ text: 'Maslo', iconURL: 'https://cdn.discordapp.com/attachments/1152608374588981329/1154165287197880410/image0.jpg' });
-      console.log('Created embed');      
+      console.info('Successfully created embed');
       embeds.push(exampleEmbed);
     });
 
+    console.info(`Sending ${embeds.length} embeds to Discord`);
     // send the embed to the discord channel in 10 piece batches
     let a = 0;
     let b = 10;
     for (let i = 0; i < embeds.length; i += 10) {
       const current = embeds.slice(a, b);
       if (!current) break;
-      console.log(`Sending ${current.length} embeds in batch ${i / 10}`);
+      console.info(`Sending ${current.length} embeds in batch ${(i / 10) + 1}`);
       await newsWebhookClient.send({
         username: NEWS_DISCORD_USERNAME,
         avatarURL: NEWS_DISCORD_AVATAR_URL,
@@ -92,7 +94,7 @@ async function sendNewsDiscordMessage(newArticles) {
       });
       a += 10;
       b += 10;
-    }    
+    }
   }
 }
 
