@@ -1,5 +1,5 @@
 const { WebhookClient, EmbedBuilder } = require("discord.js");
-
+const moment = require("moment");
 require("dotenv").config();
 
 const NEWS_DISCORD_URL = process.env.NEWS_DISCORD_URL;
@@ -49,7 +49,7 @@ async function sendNewsDiscordMessage(newArticles) {
       }
 
       const fields = [
-        { name: 'Dátum & Čas', value: `${article.articleTime}\n*${article.articleDate}*`, inline: true },
+        // { name: 'Dátum & Čas', value: `${article.articleTime}\n${moment(article.articleDate, 'DD. M. YYYY').format('DD/MM/YYYY') }`, inline: true },
       ];
 
       if (article.theme && article.theme.length > 0) {
@@ -63,6 +63,11 @@ async function sendNewsDiscordMessage(newArticles) {
       if (article.articleContent.includes('Mazurek')) {
         article.articleContent = article.articleContent.replace('Mazurek', '🥚 Mazurek 🥚')
       }
+      // Combine the date and time strings
+      const combinedDateTime = `${moment(article.articleDate, 'DD. M. YYYY').format('DD/MM/YYYY')} ${article.articleTime}`;
+
+      // Parse the combined string and convert to a UNIX timestamp
+      const unixTimestamp = moment(combinedDateTime, 'DD/MM/YYYY HH:mm').toISOString();
 
       console.info(`Creating embed for article ${article.articleId}-${article.headline}`)
       const exampleEmbed = new EmbedBuilder()
@@ -73,8 +78,8 @@ async function sendNewsDiscordMessage(newArticles) {
         .setDescription(article.articleContent)
         .addFields(fields)
         .setImage(article.img)
-        .setTimestamp()
-        .setFooter({ text: 'Maslo', iconURL: 'https://cdn.discordapp.com/attachments/1152608374588981329/1154165287197880410/image0.jpg' });
+        .setTimestamp(new Date(unixTimestamp))
+        .setFooter({ text: 'SME.sk', iconURL: 'https://cdn.discordapp.com/attachments/1152608374588981329/1154165287197880410/image0.jpg' });
       console.info('Successfully created embed');
       embeds.push(exampleEmbed);
     });
