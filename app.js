@@ -17,8 +17,12 @@ const executeJobsSequentially = async () => {
 function startApp() {
   console.info(`Server listening on port ${PORT}`);
 
+  // controller.runRedditScraper();
+  controller.makeVideo();
+  // controller.publishTiktokVideo();
+
   // Schedule the jobs after everything is set up
-  cron.schedule("*/5 * * * *", executeJobsSequentially);
+  // cron.schedule("*/5 * * * *", executeJobsSequentially);
 }
 
 // Endpoint to run the news scraper

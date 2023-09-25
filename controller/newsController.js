@@ -1,4 +1,4 @@
-const scraper = require("../newsScraper/scraper");
+const scraper = require("../scrapers/scraper");
 const articlesDatabase = require("../models/articles.mongo");
 
 const BASE_URL = "https://www.sme.sk/minuta/dolezite-spravy";
