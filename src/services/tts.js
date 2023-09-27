@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 const axios = require('axios');
 let BASE_URL = 'https://api16-normal-v6.tiktokv.com/media/api/text/speech/invoke';
 
@@ -40,14 +41,18 @@ function handleStatusError(status_code) {
 }
 
 async function createAudioFromText(textChunks = [], fileName = 'audio', text_speaker = DEFAULT_VOICE) {
-  console.log(`Creating audio file ${fileName}.mp3`);
-  // create a folder inside the TTS folder with the name of the filename
-  fs.mkdirSync(fileName, { recursive: true });
+  // Define the directory path
+  const outputPathDirectory = path.join(__dirname, '..', 'assets', 'TTS', fileName);
+
+  // Create the directory if it doesn't exist
+  if (!fs.existsSync(outputPathDirectory)) {
+    fs.mkdirSync(outputPathDirectory, { recursive: true });
+  }
+
   let counter = 0;
   const chunkDurations = [];
-  const voiceBuffers = []; // Store voice buffers
+
   for (const text of textChunks) {
-    console.log(`Creating audio for chunk: ${text}`);
     const req_text = prepareText(text);
     const URL = `${BASE_URL}/?text_speaker=${text_speaker}&req_text=${req_text}&speaker_map_type=0&aid=1233`;
     const headers = {
@@ -61,32 +66,35 @@ async function createAudioFromText(textChunks = [], fileName = 'audio', text_spe
       const status_code = result?.data?.status_code;
       if (status_code !== 0) return handleStatusError(status_code);
       const encoded_voice = result?.data?.data?.v_str;
-      const durationMS = result?.data?.data?.duration;
-      console.log(`Chunk duration: ${durationMS}`);
-      const durationS = durationMS / 1000;
-      const chunkInfo = {
-        text: text,
-        duration: durationMS
-      }
-      chunkDurations.push(chunkInfo);
       
       // create a mp3 file for each chunk with the counter as the name
-      await fs.writeFileSync(`${counter}.mp3`, Buffer.from(encoded_voice, 'base64'));
-      console.log(`Audio file ${counter}.mp3 created successfully`);
-      console.log();
+      const soundName = `${counter}.mp3`;
+      const outputPath = path.join(outputPathDirectory, soundName);
+      
+      await fs.promises.writeFile(outputPath, Buffer.from(encoded_voice, 'base64'));
+      console.log(`Audio file ${soundName} created successfully`);
+
+      const chunkInfo = {
+        text: text,
+        fileName: `${counter}.mp3`, 
+        path: outputPath,
+        duration: null,
+      }
+
+      chunkDurations.push(chunkInfo);
       counter++;
-      // voiceBuffers.push(Buffer.from(encoded_voice, 'base64'));
     } catch (err) {
       throw new Error(`tiktok-tts ${err}`);
     }
   }
 
   // Concatenate voice buffers and write to mp3 file
-  const combinedBuffer = Buffer.concat(voiceBuffers);
+  // const combinedBuffer = Buffer.concat(voiceBuffers);
   // fs.writeFileSync(`${fileName}.mp3`, combinedBuffer);
-  console.log(`Audio file ${fileName}.mp3 created successfully`);
+  console.log(`Audio process for ${fileName} completed successfully`);
   return chunkDurations;
 }
+
 
 
 

@@ -6,17 +6,20 @@ const tiktokTTS = require('../services/tts');
 const { subreddits, decentVoices } = config;
 
 const path = require('path');
+const { createCanvas, loadImage } = require('canvas');
+const fs = require('fs');
+const getMP3Duration = require('get-mp3-duration');
 
 const redditScrapeJob = async () => {
   console.info('Starting the Reddit scraper');
-  
+
 
   console.info(`Starting to scrape ${subreddits.length} subreddits`);
   const subredditOveriews = await Promise.all(subreddits.map(async (subreddit) => {
     return await scrapeSubredditOverview(subreddit);
   }));
   console.info(`Finished scraping ${subredditOveriews.length} subreddits`);
-  
+
   console.info(`Starting to scrape the stories from the overviews`);
   const stories = await Promise.all(subredditOveriews.map(async (overview) => {
     return await scrapeRedditStory(overview);
@@ -47,6 +50,32 @@ const getRedditUnsentStories = async () => {
   const stories = await redditDatabase.find({ wasSentTiktok: false });
   return stories;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 const sanitizeFilename = (filename) => {
   return filename.replace(/[\\/:*?"<>|]/g, '');
@@ -102,24 +131,82 @@ const preprocessText = (text) => {
   return text;
 }
 
-const adjustDurationsToTotal = (chunks, desiredTotal) => {
-  // Calculate the current total duration of chunks
-  const currentTotalDuration = chunks.reduce((acc, chunk) => acc + parseFloat(chunk.duration), 0);
 
-  // Adjust each chunk's duration based on its proportion of the desired total duration
-  return chunks.map(chunk => ({
-    ...chunk,
-    duration: (parseFloat(chunk.duration) / currentTotalDuration * desiredTotal).toFixed(3) // .toFixed(3) ensures we have 3 decimal points
-  }));
-};
+function wrapText(text, maxWidth) {
+  const words = text.split(' ');
+  let lines = [];
+  let currentLine = words[0];
+
+  for (let i = 1; i < words.length; i++) {
+    if (currentLine.length + words[i].length + 1 <= maxWidth) {
+      currentLine += ' ' + words[i];
+    } else {
+      lines.push(currentLine);
+      currentLine = words[i];
+    }
+  }
+  lines.push(currentLine);
+
+  return lines;
+}
+
+function generateImageFromText(text, outputFilename) {
+  const maxWidth = 25;
+  const lines = wrapText(text, maxWidth);
+
+  // Set initial parameters
+  const padding = 5;
+  const fontSize = 24;
+  const lineHeight = fontSize * 1.2;  // Adjusted vertical spacing
+  const fontWeight = 'bold';
+  const font = `${fontWeight} ${fontSize}px sans-serif`;
+
+  const tempCanvas = createCanvas(0, 0);
+  const tempCtx = tempCanvas.getContext('2d');
+  tempCtx.font = font;
+  const textWidth = Math.max(...lines.map(line => tempCtx.measureText(line).width));
+
+  const transparentBorder = 40;
+  const canvasWidth = textWidth + 2 * padding + 2 * transparentBorder;
+  const canvasHeight = (lineHeight * lines.length) + 2 * padding + 2 * transparentBorder;
+
+  const canvas = createCanvas(canvasWidth, canvasHeight);
+  const ctx = canvas.getContext('2d');
+
+  // Ensure entire canvas is transparent
+  ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+  // Set font style
+  ctx.fillStyle = '#f0f0f0';  // Mostly white with a touch of black
+  ctx.strokeStyle = 'black';  // Black stroke for text
+  ctx.lineWidth = 2;  // Adjust this value for thicker or thinner stroke
+  ctx.font = font;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'alphabetic';
+
+  // Draw each line of text, adjusting for the transparent border
+  lines.forEach((line, index) => {
+    const yPos = transparentBorder + padding + index * lineHeight + fontSize;
+    ctx.strokeText(line, canvasWidth / 2, yPos);
+    ctx.fillText(line, canvasWidth / 2, yPos);
+  });
+
+  // Save the canvas to an image file
+  const buffer = canvas.toBuffer('image/png');
+  fs.writeFileSync(outputFilename, buffer);
+}
+
+
 
 const makeTTS = async (stories) => {
   tiktokTTS.config('ad9bd62299664b32e18d8ee44a5e164f');
-  stories = stories.slice(1, 2);
+  stories = stories.slice(0, 1);
+  const storiesAfterTTS = [];
   for (const story of stories) {
-    const { storyContent, title, storyId } = story;
+    const ttsStory = JSON.parse(JSON.stringify(story));
+    const { storyContent, title, storyId } = ttsStory;
+
     const fileName = sanitizeFilename(storyId);
-    console.info(`Making TTS for story ${storyId}`);
 
     // replace all the newlines with spaces and dots if there are not any before the newline
     const text = `${title}. ${storyContent}`.replace(/\.?\n+/g, '. ');
@@ -129,18 +216,42 @@ const makeTTS = async (stories) => {
     const chunks = optimalSplit(preprocessedText);
     // get a random voice from the decent voices
     const voice = decentVoices[Math.floor(Math.random() * decentVoices.length)];
-    const ttsPath = path.join(__dirname, '..', '/TTS', `${fileName}`);
-    const chunkDurations = await tiktokTTS.createAudioFromText(chunks, ttsPath, 'en_us_006');
-    // chunk durations are {text, duration in s}
-    // if a chunk is under a second, merge it with the next chunk
-    const adjustedChunks = adjustDurationsToTotal(chunkDurations, 1);
-    
+    const chunkDurations = await tiktokTTS.createAudioFromText(chunks, fileName, 'en_us_002');
 
-    story.ttsFileName = `${fileName}`;
-    story.mergedChunks = chunkDurations;
+    // generate the images for the chunks
+    const subtitleImageFolderPath = path.join(__dirname, '..', 'assets', 'subtitles', fileName);
+    if (!fs.existsSync(subtitleImageFolderPath)) {
+      fs.mkdirSync(subtitleImageFolderPath, { recursive: true });
+    }
+
+    // const create a folder for the part headings
+    const partHeadingFolderPath = path.join(__dirname, '..', 'assets', 'partHeadings', fileName);
+    if (!fs.existsSync(partHeadingFolderPath)) {
+      fs.mkdirSync(partHeadingFolderPath, { recursive: true });
+      for (let i = 1; i < 10; i++) {
+        const imagePath = path.join(partHeadingFolderPath, `part${i}.png`);
+        generateImageFromText(`Part ${i}`, imagePath);
+      }
+    }
+
+
+    // now fill out the chunk durations
+    chunkDurations.map((chunk, i) => {
+      const chunkBuffer = fs.readFileSync(chunk.path);
+      const duration = getMP3Duration(chunkBuffer);
+      chunk.duration = duration / 1000;
+
+      const imagePath = path.join(subtitleImageFolderPath, `${i}.png`);
+      generateImageFromText(chunk.text, imagePath);
+      chunk.imagePath = imagePath;
+    })
+
+    ttsStory.ttsFileName = `${fileName}`;
+    ttsStory.chunks = chunkDurations;
+    storiesAfterTTS.push(ttsStory);
   }
 
-  return stories;
+  return storiesAfterTTS;
 }
 module.exports = {
   redditScrapeJob,

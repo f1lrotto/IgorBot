@@ -1,7 +1,7 @@
 const express = require("express");
 const cron = require("node-cron");
-const { connectMongo } = require("./services/mongo");
-const controller = require("./controller/mainController");
+const { connectMongo } = require("./src/services/mongo");
+const controller = require("./src/controller/mainController");
 require("dotenv").config();
 
 const app = express();
