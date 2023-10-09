@@ -1,6 +1,7 @@
 const { WebhookClient, EmbedBuilder } = require("discord.js");
-const moment = require("moment");
+const moment = require("moment-timezone");
 require("dotenv").config();
+moment.tz.setDefault("Europe/Bratislava");
 
 const NEWS_DISCORD_URL = process.env.NEWS_DISCORD_URL;
 const NEWS_DISCORD_USERNAME = "Memečiar";
