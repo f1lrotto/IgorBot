@@ -5,7 +5,12 @@ const moment = require('moment-timezone');
 const scrapeOverview = async (url) => {
   console.info(`Scraping ${url}`);
   const articles = [];
-  const response = await axios.get(url);
+  const response = await axios.get(url, {
+    headers: {
+      'Cache-Control': 'no-cache',
+      'Pragma': 'no-cache'
+    }
+  });
   const html = response.data;
   const $ = cheerio.load(html);
 
