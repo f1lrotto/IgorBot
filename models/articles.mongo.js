@@ -23,7 +23,6 @@ const articlesSchema = new mongoose.Schema(
     },
     articleContent: {
       type: String,
-      required: true,
     },
     articleUrl: {
       type: String,
