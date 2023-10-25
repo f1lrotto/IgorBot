@@ -1,7 +1,7 @@
 const scraper = require("../newsScraper/scraper");
 const articlesDatabase = require("../models/articles.mongo");
 
-const BASE_URL = "https://www.sme.sk/minuta/dolezite-spravy";
+const BASE_URL = "https://www.sme.sk/minuta";
 
 const newsScrapeJob = async () => {
   console.info('Starting the news scraper');
