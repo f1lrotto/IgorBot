@@ -104,6 +104,46 @@ async function sendNewsDiscordMessage(newArticles) {
   }
 }
 
+const TRAIN_DISCORD_URL = process.env.TRAIN_DISCORD_URL;
+const TRAIN_USERNAME = "NestiháčikVláčik";
+const TRAIN_AVATAR_URL = "https://cdn.discordapp.com/attachments/457885524292665348/1166862329904898068/thomas-the-tank-engine-screaming-as-he-travels-through-v0-eeux64f7ahha1.png?ex=654c083a&is=6539933a&hm=1f4e63a5ff71421b8ca3689280e0ef2d3b28ebb986fcb67a92ecd9733b25b46d&";
+
+const trainWebhookClient = new WebhookClient({ url: TRAIN_DISCORD_URL });
+
+const sendTrainDiscordMessage = (trains) => {
+  if (trains.length !== 0) {
+    console.info(`Attempting to send ${trains.length} new trains to Discord`);
+    const embeds = [];
+    trains.forEach((train) => {
+      const embed = new EmbedBuilder()
+        .setColor(0xfc9d03)
+        .setTitle(train.content)
+        .setURL(train.url)
+        .setAuthor({ name: 'Železničná spoločnosť Slovensko', url: 'https://mastodon.social/@zssk_mimoriadne', iconURL: TRAIN_AVATAR_URL })
+        .setTimestamp(new Date(moment(train.date).toISOString()))
+        .setFooter({ text: 'ZSSK'});
+      embeds.push(embed);
+    });
+
+    // send the embed to the discord channel in 10 piece batches
+    let a = 0;
+    let b = 10;
+    for (let i = 0; i < embeds.length; i += 10) {
+      const current = embeds.slice(a, b);
+      if (!current) break;
+      console.info(`Sending ${current.length} embeds in batch ${(i / 10) + 1}`);
+      trainWebhookClient.send({
+        username: TRAIN_USERNAME,
+        avatarURL: TRAIN_AVATAR_URL,
+        embeds: current,
+      });
+      a += 10;
+      b += 10;
+    }
+  }
+};
+
 module.exports = {
   sendNewsDiscordMessage,
+  sendTrainDiscordMessage,
 };

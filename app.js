@@ -8,17 +8,24 @@ const app = express();
 
 const PORT = process.env.PORT || 8000;
 
-const executeJobsSequentially = async () => {
-  console.info("Executing a scheduled cronjob to scrape and send");
+const executeNewsJobsSequentially = async () => {
+  console.info("NEWS: Executing a scheduled cronjob to scrape and send");
   await controller.runNewsScraper();
   await controller.sendNews();
 };
+
+const executeTrainJobsSequentially = async () => {
+  console.info("TRAIN: Executing a scheduled cronjob to scrape and send");
+  await controller.runTrainScraper();
+  await controller.sendTrain();
+}
 
 function startApp() {
   console.info(`Server listening on port ${PORT}`);
 
   // Schedule the jobs after everything is set up
-  cron.schedule("*/15 * * * *", executeJobsSequentially);
+  cron.schedule("*/30 * * * *", executeNewsJobsSequentially);
+  cron.schedule("*/5 * * * *", executeTrainJobsSequentially);
 }
 
 // Endpoint to run the news scraper
