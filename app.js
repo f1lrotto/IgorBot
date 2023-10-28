@@ -24,7 +24,7 @@ function startApp() {
   console.info(`Server listening on port ${PORT}`);
 
   // Schedule the jobs after everything is set up
-  cron.schedule("*/30 * * * *", executeNewsJobsSequentially);
+  cron.schedule("*/15 * * * *", executeNewsJobsSequentially);
   cron.schedule("*/5 * * * *", executeTrainJobsSequentially);
 }
 
