@@ -16,7 +16,6 @@ async function formulaScrapeJob() {
     const image = $(element).find('.f1-cc--photo').find('.lazy').attr('data-src');
 
     articles.push({ title, url: `https://www.formula1.com${url}`, scrapeDate, tag, image });
-    console.log({ title, url: `https://www.formula1.com${url}`, scrapeDate, tag, image })
   });
 
   return articles;
