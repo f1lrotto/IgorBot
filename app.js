@@ -20,12 +20,19 @@ const executeTrainJobsSequentially = async () => {
   await controller.sendTrain();
 }
 
+const executeFormulaJobsSequentially = async () => {
+  console.info("FORMULA: Executing a scheduled cronjob to scrape and send");
+  await controller.runFormulaScraper();
+  await controller.sendFormula();
+}
+
 function startApp() {
   console.info(`Server listening on port ${PORT}`);
 
   // Schedule the jobs after everything is set up
   cron.schedule("*/15 * * * *", executeNewsJobsSequentially);
   cron.schedule("*/5 * * * *", executeTrainJobsSequentially);
+  cron.schedule("*/30 * * * *", executeFormulaJobsSequentially);
 }
 
 // Endpoint to run the news scraper

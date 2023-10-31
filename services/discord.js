@@ -14,12 +14,18 @@ const config = {
     discordURL: process.env.TRAIN_DISCORD_URL,
     username: "NestiháčikVláčik",
     avatarURL: "https://cdn.discordapp.com/attachments/457885524292665348/1166862329904898068/thomas-the-tank-engine-screaming-as-he-travels-through-v0-eeux64f7ahha1.png?ex=654c083a&is=6539933a&hm=1f4e63a5ff71421b8ca3689280e0ef2d3b28ebb986fcb67a92ecd9733b25b46d&"
+  },
+  formula: {
+    discordURL: process.env.FORMULA_DISCORD_URL,
+    username: "hihi:)",
+    avatarURL: "https://media.discordapp.net/attachments/1000236490133090355/1168283077408211025/F1-Instagram-1280x720.jpg?ex=65513367&is=653ebe67&hm=bdabe2ab1982e7d0916921c8e11a96bac539305787f71c09dfbd60b6cbc19836&=&width=1202&height=676"
   }
 };
 
 const webhookClients = {
   news: new WebhookClient({ url: config.news.discordURL }),
-  train: new WebhookClient({ url: config.train.discordURL })
+  train: new WebhookClient({ url: config.train.discordURL }),
+  formula: new WebhookClient({ url: config.formula.discordURL })
 };
 
 const articleCategoryConfig = {
@@ -105,7 +111,19 @@ function createTrainEmbed(train) {
     .setFooter({ text: 'ZSSK' });
 }
 
+function createFormulaEmbed(article) {
+  return new EmbedBuilder()
+    .setColor(0xff0000)
+    .setTitle(article.title)
+    .setURL(article.url)
+    .setAuthor({ name: article.tag, url: 'https://www.formula1.com/en/latest/all.html#default', iconURL: config.formula.avatarURL })
+    .setTimestamp(new Date(article.scrapeDate))
+    .setFooter({ text: 'Formula1.com' });
+}
+
+
 module.exports = {
   sendNewsDiscordMessage: async (articles) => sendDiscordMessage('news', articles, createNewsEmbed),
-  sendTrainDiscordMessage: async (trains) => sendDiscordMessage('train', trains, createTrainEmbed)
+  sendTrainDiscordMessage: async (trains) => sendDiscordMessage('train', trains, createTrainEmbed),
+  sendFormulaDiscordMessage: async (articles) => sendDiscordMessage('formula', articles, createFormulaEmbed),
 };
