@@ -10,11 +10,13 @@ async function formulaScrapeJob() {
   const articles = [];
   $('.f1-latest-listing--grid-item').each((i, element) => {
     const url = $(element).find('a').attr('href');
-    const title = $(element).find('.f1--s').text();
+    const title = $(element).find('.f1-cc--caption').children().eq(1).text();
     const scrapeDate = new Date();
-    const tag = $(element).find('.misc--tag').text();
+    const tag = $(element).find('.misc--tag').text().trim().replace(/\s+/g, ' ');
+    const image = $(element).find('.f1-cc--photo').find('.lazy').attr('data-src');
 
-    articles.push({ title, url, scrapeDate, tag });
+    articles.push({ title, url: `https://www.formula1.com${url}`, scrapeDate, tag, image });
+    console.log({ title, url: `https://www.formula1.com${url}`, scrapeDate, tag, image })
   });
 
   return articles;

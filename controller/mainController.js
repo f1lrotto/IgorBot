@@ -1,4 +1,4 @@
-const { sendNewsDiscordMessage, sendTrainDiscordMessage } = require("../services/discord");
+const { sendNewsDiscordMessage, sendTrainDiscordMessage, sendFormulaDiscordMessage } = require("../services/discord");
 const { newsScrapeJob, saveNewsToDatabase, getNewsUnsentArticles } = require("./newsController");
 const { getTrainInfo, saveTrainInfoToDatabase, getUnesntTrains } = require("./trainController");
 const { formulaScrapeJob, saveFormulaToDatabase, getUnsentFormula } = require("./formulaController");

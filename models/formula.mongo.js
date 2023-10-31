@@ -15,6 +15,7 @@ const formulaSchema = new mongoose.Schema(
       required: true,
     },
     tag: String,
+    image: String,
     wasSent: {
       type: Boolean,
       required: true,

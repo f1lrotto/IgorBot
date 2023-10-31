@@ -116,6 +116,7 @@ function createFormulaEmbed(article) {
     .setColor(0xff0000)
     .setTitle(article.title)
     .setURL(article.url)
+    .setImage(article.image)
     .setAuthor({ name: article.tag, url: 'https://www.formula1.com/en/latest/all.html#default', iconURL: config.formula.avatarURL })
     .setTimestamp(new Date(article.scrapeDate))
     .setFooter({ text: 'Formula1.com' });
