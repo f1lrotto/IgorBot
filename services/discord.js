@@ -55,6 +55,11 @@ async function sendDiscordMessage(clientConfig, items, createEmbed) {
   console.info(`Attempting to send ${items.length} items to Discord`);
   const embeds = items.map(createEmbed);
 
+  // sort the embeds by date from oldest to newest
+  embeds.sort((a, b) => {
+    return new Date(a.timestamp) - new Date(b.timestamp);
+  });
+
   // send the embeds to the discord channel in 10 piece batches
   for (let i = 0; i < embeds.length; i += 10) {
     const batch = embeds.slice(i, i + 10);
