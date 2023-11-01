@@ -2,11 +2,31 @@ const express = require("express");
 const cron = require("node-cron");
 const { connectMongo } = require("./services/mongo");
 const controller = require("./controller/mainController");
+const { discordLogin, botParams } = require("./services/discordBot");
 require("dotenv").config();
 
 const app = express();
-
 const PORT = process.env.PORT || 8000;
+
+const jobQueue = [];
+
+const addToQueue = (job) => {
+  jobQueue.push(job);
+  console.info('Job added to queue');
+};
+
+const processQueue = async () => {
+  if (jobQueue.length > 0) {
+    const job = jobQueue.shift();
+    try {
+      console.info('Processing job from queue');
+      await job();
+      console.info('Job processed successfully');
+    } catch (error) {
+      console.error('Error processing job:', error);
+    }
+  }
+};
 
 const executeNewsJobsSequentially = async () => {
   console.info("NEWS: Executing a scheduled cronjob to scrape and send");
@@ -18,22 +38,32 @@ const executeTrainJobsSequentially = async () => {
   console.info("TRAIN: Executing a scheduled cronjob to scrape and send");
   await controller.runTrainScraper();
   await controller.sendTrain();
-}
+};
 
 const executeFormulaJobsSequentially = async () => {
   console.info("FORMULA: Executing a scheduled cronjob to scrape and send");
   await controller.runFormulaScraper();
   await controller.sendFormula();
-}
+};
 
 function startApp() {
   console.info(`Server listening on port ${PORT}`);
+  console.info("Starting up the discord bot");
+  discordLogin(botParams);
+  connectMongo()
 
-  // Schedule the jobs after everything is set up
-  cron.schedule("*/15 * * * *", executeNewsJobsSequentially);
-  cron.schedule("*/5 * * * *", executeTrainJobsSequentially);
-  cron.schedule("*/30 * * * *", executeFormulaJobsSequentially);
+  if (process.env.ENV !== 'LOCAL') {
+    console.info("Scheduling cronjobs on a non-local environment");
+    cron.schedule("*/15 * * * *", () => addToQueue(executeNewsJobsSequentially));
+    cron.schedule("*/5 * * * *", () => addToQueue(executeTrainJobsSequentially));
+    cron.schedule("*/30 * * * *", () => addToQueue(executeFormulaJobsSequentially));
+  } else {
+    console.info("Cronjobs not scheduled on a local environment");
+  }
+
+  setInterval(processQueue, 1000);  // Check the queue every second
 }
+
 
 // Endpoint to run the news scraper
 app.get('/runNewsScraper', async (req, res) => {
@@ -59,13 +89,4 @@ app.get('/sendNews', async (req, res) => {
   }
 });
 
-// Start the MongoDB connection
-connectMongo()
-  .then(() => {
-    // Start listening after the MongoDB connection is established
-    app.listen(PORT, startApp);
-  })
-  .catch((err) => {
-    console.error("Failed to connect to MongoDB", err);
-    process.exit(1);
-  });
+app.listen(PORT, startApp);
