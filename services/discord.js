@@ -7,8 +7,8 @@ moment.tz.setDefault("Europe/Bratislava");
 const config = {
   news: {
     discordURL: process.env.NEWS_DISCORD_URL,
-    username: "Pelle",
-    avatarURL: "https://cdn.discordapp.com/attachments/1166864888661016648/1220049174427340910/peter-pellegrini.png?ex=660d8656&is=65fb1156&hm=fffae5e64f539ce57a60b4ab2b790a26c4d7ed07c3863d0c8a52543f5a304585&"
+    username: "Harinbaba",
+    avatarURL: "https://cdn.discordapp.com/attachments/1166864888661016648/1220357651721097327/Screenshot_20240321_140521_Instagram.jpg?ex=660ea5a1&is=65fc30a1&hm=424a87976a41d6ceb76cb89e7e9f9f4f253d83fb85d3eec7fa9ccd3105ae5820&"
   },
   train: {
     discordURL: process.env.TRAIN_DISCORD_URL,
