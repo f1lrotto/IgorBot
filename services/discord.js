@@ -7,8 +7,8 @@ moment.tz.setDefault("Europe/Bratislava");
 const config = {
   news: {
     discordURL: process.env.NEWS_DISCORD_URL,
-    username: "Pelle",
-    avatarURL: "https://www.faz.net/aktuell/politik/peter-pellegrini-koenigsmacher-oder-koenig-19219791/peter-pellegrini-19219788.html"
+    username: "Memečiar",
+    avatarURL: "https://cdn.discordapp.com/attachments/457885524292665348/1154872367995162634/image.png"
   },
   train: {
     discordURL: process.env.TRAIN_DISCORD_URL,
