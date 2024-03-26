@@ -8,7 +8,7 @@ const config = {
   news: {
     discordURL: process.env.NEWS_DISCORD_URL,
     username: "Pelle",
-    avatarURL: "https://cdn.discordapp.com/attachments/1166864888661016648/1220049174427340910/peter-pellegrini.png?ex=660d8656&is=65fb1156&hm=fffae5e64f539ce57a60b4ab2b790a26c4d7ed07c3863d0c8a52543f5a304585&"
+    avatarURL: "https://www.faz.net/aktuell/politik/peter-pellegrini-koenigsmacher-oder-koenig-19219791/peter-pellegrini-19219788.html"
   },
   train: {
     discordURL: process.env.TRAIN_DISCORD_URL,
