@@ -32,7 +32,7 @@ function startApp() {
   // Schedule the jobs after everything is set up
   cron.schedule("*/15 * * * *", executeNewsJobsSequentially);
   cron.schedule("*/5 * * * *", executeTrainJobsSequentially);
-  cron.schedule("*/30 * * * *", executeFormulaJobsSequentially);
+  // cron.schedule("*/30 * * * *", executeFormulaJobsSequentially);
 }
 
 // Endpoint to run the news scraper
