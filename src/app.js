@@ -56,7 +56,7 @@ function startApp() {
     console.info("Scheduling cronjobs on a non-local environment");
     cron.schedule("*/15 * * * *", () => addToQueue(executeNewsJobsSequentially));
     cron.schedule("*/5 * * * *", () => addToQueue(executeTrainJobsSequentially));
-    cron.schedule("*/30 * * * *", () => addToQueue(executeFormulaJobsSequentially));
+    // cron.schedule("*/30 * * * *", () => addToQueue(executeFormulaJobsSequentially));
   } else {
     console.info("Cronjobs not scheduled on a local environment");
   }
