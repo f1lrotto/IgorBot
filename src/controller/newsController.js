@@ -1,12 +1,15 @@
-const scraper = require("../newsScraper/scraper");
+const moment = require("moment-timezone");
+moment.tz.setDefault("Europe/Bratislava");
+
+const smeScraper = require("../newsScraper/smeScraper");
 const articlesDatabase = require("../models/articles.mongo");
 
-const BASE_URL = "https://www.sme.sk/minuta/dolezite-spravy";
+const SME_URL = "https://www.sme.sk/minuta/dolezite-spravy";
 
 const newsScrapeJob = async () => {
-  console.info("Starting the news scraper");
-  const articles = await scraper.scrapeOverview(BASE_URL);
-  console.info(`Scraped ${articles.length} articles`);
+  console.info("Starting the smeScraper");
+  const articles = await smeScraper.scrapeOverview(SME_URL);
+  console.info(`Scraped ${articles.length} articles from SME`);
   return articles;
 };
 
@@ -49,8 +52,26 @@ const getNewsUnsentArticles = async () => {
   return articles;
 };
 
+const getYesterdayNews = async () => {
+  const yesterday = moment().subtract(0, "days");
+  const yesterdayStart = yesterday.startOf("day").toDate();
+  const yesterdayEnd = yesterday.endOf("day").toDate();
+  const articles = await articlesDatabase
+    .find({
+      articleTimestamp: {
+        $gte: yesterdayStart,
+        $lt: yesterdayEnd,
+      },
+    })
+    .lean()
+    .exec();
+  console.info(`Found ${articles.length} articles from yesterday`);
+  return articles;
+};
+
 module.exports = {
   newsScrapeJob,
   saveNewsToDatabase,
   getNewsUnsentArticles,
+  getYesterdayNews,
 };

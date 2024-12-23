@@ -1,12 +1,15 @@
 const {
   sendNewsMessages,
   sendTrainMessages,
+  sendMorningNewsMessages,
 } = require("../services/messageDistributor");
 const {
   newsScrapeJob,
   saveNewsToDatabase,
   getNewsUnsentArticles,
+  getYesterdayNews,
 } = require("./newsController");
+const { makeMorningNewsReport } = require("./morningReportController");
 const {
   getTrainInfo,
   saveTrainInfoToDatabase,
@@ -53,9 +56,24 @@ const sendTrain = async (client) => {
   return 0;
 };
 
+// MORNING NEWS
+const morningNews = async (client) => {
+  console.info("Starting a job to send morning news to Discord servers");
+  const articles = await getYesterdayNews();
+  if (articles.length === 0) {
+    console.info("No news to send, 0 unsent articles found");
+    return 1;
+  }
+  const report = await makeMorningNewsReport(articles);
+  await sendMorningNewsMessages(client, report);
+  console.info("Morning news sent successfully");
+  return 0;
+};
+
 module.exports = {
   runNewsScraper,
   sendNews,
   runTrainScraper,
   sendTrain,
+  morningNews,
 };

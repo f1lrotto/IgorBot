@@ -14,6 +14,9 @@ const articlesSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    articleTimestamp: {
+      type: Date,
+    },
     category: {
       type: String,
     },
@@ -24,9 +27,15 @@ const articlesSchema = new mongoose.Schema(
     articleContent: {
       type: String,
     },
+    fullContent: {
+      type: String,
+    },
     articleUrl: {
       type: String,
       required: true,
+    },
+    source: {
+      type: String,
     },
     theme: {
       type: Array,

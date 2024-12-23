@@ -41,6 +41,11 @@ const executeTrainJobsSequentially = async () => {
   await controller.sendTrain(client);
 };
 
+const sendMorningNews = async () => {
+  console.info("Sending morning news");
+  await controller.morningNews(client);
+};
+
 async function startApp() {
   try {
     console.info("Connecting to MongoDB...");
@@ -60,6 +65,7 @@ async function startApp() {
       cron.schedule("*/15 * * * *", () =>
         addToQueue(executeTrainJobsSequentially)
       );
+      cron.schedule("0 8 * * *", () => addToQueue(sendMorningNews));
 
       // Process queue every minute
       setInterval(processQueue, 60000);
@@ -78,12 +84,22 @@ async function startApp() {
 // Endpoint to run the news scraper
 app.get("/runNewsScraper", async (req, res) => {
   try {
-    await controller.runNewsScraper();
+    // await controller.runNewsScraper();
     await controller.sendNews(client);
     res.status(200).json({ message: "News scraper executed successfully" });
   } catch (error) {
     console.error("Error running news scraper:", error);
     res.status(500).json({ error: "Failed to run news scraper" });
+  }
+});
+
+app.get("/runMorningNews", async (req, res) => {
+  try {
+    await controller.morningNews(client);
+    res.status(200).json({ message: "Morning news sent successfully" });
+  } catch (error) {
+    console.error("Error sending morning news:", error);
+    res.status(500).json({ error: "Failed to send morning news" });
   }
 });
 

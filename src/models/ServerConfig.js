@@ -15,6 +15,10 @@ const serverConfigSchema = new mongoose.Schema({
       type: String,
       default: null,
     },
+    "morning-news": {
+      type: String,
+      default: null,
+    },
   },
   createdAt: {
     type: Date,

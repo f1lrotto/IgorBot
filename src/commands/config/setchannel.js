@@ -12,6 +12,7 @@ module.exports = {
         .setRequired(true)
         .addChoices(
           { name: "News", value: "news" },
+          { name: "Morning news", value: "morning-news" },
           { name: "Train", value: "train" }
         )
     )

@@ -4,48 +4,53 @@ const moment = require("moment-timezone");
 
 moment.tz.setDefault("Europe/Bratislava");
 
-const articleCategoryConfig = {
-  Domov: {
-    color: 0xc73636,
-    categoryUrl: "https://www.sme.sk/minuta/rubrika/7761/domov",
-    iconURL:
-      "https://cdn.discordapp.com/attachments/457885524292665348/1154878264049930250/image.png",
-  },
-  Svet: {
-    color: 0xd9d918,
-    categoryUrl: "https://www.sme.sk/minuta/rubrika/7763/svet",
-    iconURL:
-      "https://cdn.discordapp.com/attachments/457885524292665348/1154879552733061120/image.png",
-  },
-  Ekonomika: {
-    color: 0x207ae3,
-    categoryUrl: "https://www.sme.sk/minuta/rubrika/7764/ekonomika",
-    iconURL:
-      "https://cdn.discordapp.com/attachments/457885524292665348/1154878891941433458/image.png",
-  },
-  Regióny: {
-    color: 0x972fd4,
-    categoryUrl: "https://www.sme.sk/minuta/rubrika/7768/regiony",
-    iconURL:
-      "https://cdn.discordapp.com/attachments/457885524292665348/1154880664173301760/image.png",
-  },
+const sourceConfig = {
+  SME: {
+    color: 0xd45959,
+    url: "https://www.sme.sk/minuta/dolezite-spravy",
+    iconURL: "https://cdn.discordapp.com/attachments/1320838726603112568/1320851067847835719/331729766_1659510097825524_2275160154005558333_n.png?ex=676b19ea&is=6769c86a&hm=9c95ec3ec8630a9df75b2f472e401d964ad53e469cbad4fd361d301735b3c736&",
+    name: "SME"
+  }
+  // Add other sources here in the future
 };
 
 function createNewsEmbed(article) {
   const category = article.category || "Uncategorized";
-  const config = articleCategoryConfig[category] || {
+  const source = article.source || "Unknown";
+  const sourceSettings = sourceConfig[source] || {
     color: 0x808080,
+    url: "https://example.com",
     iconURL: "https://example.com/default-icon.png",
+    name: "Unknown Source"
   };
 
+  const fields = [];
+  
+  // Add category field
+  fields.push({ 
+    name: "Kategória", 
+    value: category,
+    inline: true 
+  });
+
+  // Add themes if they exist
+  if (article.theme && article.theme.length > 0) {
+    const name = article.theme.length > 1 ? "Témy" : "Téma";
+    fields.push({ 
+      name, 
+      value: article.theme.join("\n"), 
+      inline: true 
+    });
+  }
+
   return new EmbedBuilder()
-    .setColor(config.color || 0x4f2b04)
+    .setColor(sourceSettings.color)
     .setTitle(article.headline)
     .setURL(article.articleUrl)
     .setAuthor({
-      name: article.category,
-      url: config.categoryUrl,
-      iconURL: config.iconURL,
+      name: sourceSettings.name,
+      url: sourceSettings.url,
+      iconURL: sourceSettings.iconURL
     })
     .setDescription(article.articleContent)
     .addFields(fields)
@@ -55,12 +60,7 @@ function createNewsEmbed(article) {
         `${article.articleDate} ${article.articleTime}`,
         "DD. MM. YYYY HH:mm"
       ).toDate()
-    )
-    .setFooter({
-      text: "SME.sk",
-      iconURL:
-        "https://cdn.discordapp.com/attachments/1152608374588981329/1154165287197880410/image0.jpg",
-    });
+    );
 }
 
 function createTrainEmbed(train) {
@@ -77,21 +77,21 @@ function createTrainEmbed(train) {
     .setFooter({ text: "ZSSK" });
 }
 
-async function distributeMessages(client, type, items, createEmbed) {
+const distributeMessages = async (client, channelType, messages, createEmbed) => {
   try {
     // Get all server configurations that have this type of channel configured
     const configs = await ServerConfig.find({
-      [`channels.${type}`]: { $ne: null },
+      [`channels.${channelType}`]: { $ne: null },
     })
       .lean()
       .exec();
 
     // Create embeds for each item
-    const embeds = items.map((item) => createEmbed(item));
+    const embeds = messages.map((item) => createEmbed(item));
 
     // Send to each configured channel
     for (const config of configs) {
-      const channelId = config.channels[type];
+      const channelId = config.channels[channelType];
       const channel = await client.channels.fetch(channelId);
 
       if (!channel) {
@@ -107,9 +107,37 @@ async function distributeMessages(client, type, items, createEmbed) {
       }
     }
   } catch (error) {
-    console.error(`Error distributing ${type} messages:`, error);
+    console.error(`Error distributing ${channelType} messages:`, error);
   }
-}
+};
+
+const distributePlainMessage = async (client, channelType, message) => {
+  try {
+    const servers = await ServerConfig.find({
+      [`channels.${channelType}`]: { $ne: null },
+    }).lean();
+
+    if (servers.length === 0) {
+      console.info(`No servers configured for ${channelType}`);
+      return;
+    }
+
+    for (const server of servers) {
+      const channelId = server.channels[channelType];
+      const channel = await client.channels.fetch(channelId);
+      
+      if (channel) {
+        await channel.send({
+          content: message,
+          flags: ['SuppressEmbeds']
+        });
+        console.info(`Message sent to server ${server.guildId} for ${channelType}`);
+      }
+    }
+  } catch (error) {
+    console.error(`Error sending message for ${channelType}:`, error);
+  }
+};
 
 module.exports = {
   async sendNewsMessages(client, articles) {
@@ -118,5 +146,9 @@ module.exports = {
 
   async sendTrainMessages(client, trains) {
     await distributeMessages(client, "train", trains, createTrainEmbed);
+  },
+
+  async sendMorningNewsMessages(client, report) {
+    await distributePlainMessage(client, "morning-news", report);
   },
 };
