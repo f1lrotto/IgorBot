@@ -2,7 +2,7 @@ const express = require("express");
 const cron = require("node-cron");
 const { connectMongo } = require("./services/mongo");
 const controller = require("./controller/mainController");
-const { discordLogin, botParams } = require("./services/discordBot");
+const { client } = require("./services/discordBot");
 require("dotenv").config();
 
 const app = express();
@@ -31,62 +31,81 @@ const processQueue = async () => {
 const executeNewsJobsSequentially = async () => {
   console.info("NEWS: Executing a scheduled cronjob to scrape and send");
   await controller.runNewsScraper();
-  await controller.sendNews();
+  await controller.sendNews(client);
 };
 
 const executeTrainJobsSequentially = async () => {
   console.info("TRAIN: Executing a scheduled cronjob to scrape and send");
   await controller.runTrainScraper();
-  await controller.sendTrain();
+  await controller.sendTrain(client);
 };
 
 const executeFormulaJobsSequentially = async () => {
   console.info("FORMULA: Executing a scheduled cronjob to scrape and send");
   await controller.runFormulaScraper();
-  await controller.sendFormula();
+  await controller.sendFormula(client);
 };
 
-function startApp() {
-  console.info(`Server listening on port ${PORT}`);
-  console.info("Starting up the discord bot");
-  discordLogin(botParams);
-  connectMongo()
+async function startApp() {
+  try {
+    console.info("Connecting to MongoDB...");
+    await connectMongo();
+    console.info("MongoDB connected successfully");
 
-  if (process.env.ENV !== 'LOCAL') {
-    console.info("Scheduling cronjobs on a non-local environment");
+    app.listen(PORT, () => {
+      console.info(`Server listening on port ${PORT}`);
+    });
+
+    // Schedule jobs
     cron.schedule("*/15 * * * *", () => addToQueue(executeNewsJobsSequentially));
-    cron.schedule("*/5 * * * *", () => addToQueue(executeTrainJobsSequentially));
-    // cron.schedule("*/30 * * * *", () => addToQueue(executeFormulaJobsSequentially));
-  } else {
-    console.info("Cronjobs not scheduled on a local environment");
+    cron.schedule("*/15 * * * *", () => addToQueue(executeTrainJobsSequentially));
+    cron.schedule("*/15 * * * *", () => addToQueue(executeFormulaJobsSequentially));
+
+    // Process queue every minute
+    setInterval(processQueue, 60000);
+
+    // Start processing immediately
+    processQueue();
+  } catch (error) {
+    console.error("Failed to start the application:", error);
+    process.exit(1);
   }
-
-  setInterval(processQueue, 1000);  // Check the queue every second
 }
-
 
 // Endpoint to run the news scraper
 app.get('/runNewsScraper', async (req, res) => {
   try {
-    console.info('Running news scraper from endpoint');
     await controller.runNewsScraper();
-    res.status(200).send('News scraper executed successfully.');
+    await controller.sendNews(client);
+    res.status(200).json({ message: 'News scraper executed successfully' });
   } catch (error) {
-    console.error('Failed to execute news scraper: ' + error.message);
-    res.status(500).send('Failed to execute news scraper: ' + error.message);
+    console.error('Error running news scraper:', error);
+    res.status(500).json({ error: 'Failed to run news scraper' });
   }
 });
 
-// Endpoint to send the news
-app.get('/sendNews', async (req, res) => {
+// Endpoint to run the train scraper
+app.get('/runTrainScraper', async (req, res) => {
   try {
-    console.info('Sending news from endpoint');
-    await controller.sendNews();
-    res.status(200).send('News sent successfully.');
+    await controller.runTrainScraper();
+    await controller.sendTrain(client);
+    res.status(200).json({ message: 'Train scraper executed successfully' });
   } catch (error) {
-    console.error('Failed to send news: ' + error.message);
-    res.status(500).send('Failed to send news: ' + error.message);
+    console.error('Error running train scraper:', error);
+    res.status(500).json({ error: 'Failed to run train scraper' });
   }
 });
 
-app.listen(PORT, startApp);
+// Endpoint to run the formula scraper
+app.get('/runFormulaScraper', async (req, res) => {
+  try {
+    await controller.runFormulaScraper();
+    await controller.sendFormula(client);
+    res.status(200).json({ message: 'Formula scraper executed successfully' });
+  } catch (error) {
+    console.error('Error running formula scraper:', error);
+    res.status(500).json({ error: 'Failed to run formula scraper' });
+  }
+});
+
+startApp();

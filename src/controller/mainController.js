@@ -1,4 +1,4 @@
-const { sendNewsDiscordMessage, sendTrainDiscordMessage, sendFormulaDiscordMessage } = require("../services/discordWebhook");
+const { sendNewsMessages, sendTrainMessages, sendFormulaMessages } = require("../services/messageDistributor");
 const { newsScrapeJob, saveNewsToDatabase, getNewsUnsentArticles } = require("./newsController");
 const { getTrainInfo, saveTrainInfoToDatabase, getUnesntTrains } = require("./trainController");
 const { formulaScrapeJob, saveFormulaToDatabase, getUnsentFormula } = require("./formulaController");
@@ -11,16 +11,15 @@ const runNewsScraper = async () => {
   return 0;
 };
 
-const sendNews = async () => {
-  console.info("Starting a job to send news to a discord server");
+const sendNews = async (client) => {
+  console.info("Starting a job to send news to Discord servers");
   const articles = await getNewsUnsentArticles();
   if (articles.length === 0) {
     console.info("No news to send, 0 unsent articles found");
     return 1;
   }
-  sendNewsDiscordMessage(articles);
+  await sendNewsMessages(client, articles);
   console.info("News sent successfully");
-
   return 0;
 };
 
@@ -32,16 +31,15 @@ const runTrainScraper = async () => {
   return 0;
 };
 
-const sendTrain = async () => {
-  console.info("Starting a job to send train info to a discord server");
+const sendTrain = async (client) => {
+  console.info("Starting a job to send train info to Discord servers");
   const trains = await getUnesntTrains();
   if (trains.length === 0) {
     console.info("No trains to send, 0 unsent trains found");
     return 1;
   }
-  sendTrainDiscordMessage(trains);
+  await sendTrainMessages(client, trains);
   console.info("Trains sent successfully");
-
   return 0;
 }
 
@@ -53,16 +51,15 @@ const runFormulaScraper = async () => {
   return 0;
 };
 
-const sendFormula = async () => {
-  console.info("Starting a job to send formula news to a discord server");
+const sendFormula = async (client) => {
+  console.info("Starting a job to send formula news to Discord servers");
   const articles = await getUnsentFormula();
   if (articles.length === 0) {
     console.info("No formula news to send, 0 unsent articles found");
     return 1;
   }
-  sendFormulaDiscordMessage(articles);
+  await sendFormulaMessages(client, articles);
   console.info("Formula news sent successfully");
-
   return 0;
 };
 
