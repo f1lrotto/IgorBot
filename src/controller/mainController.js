@@ -1,6 +1,17 @@
-const { sendNewsMessages, sendTrainMessages } = require("../services/messageDistributor");
-const { newsScrapeJob, saveNewsToDatabase, getNewsUnsentArticles } = require("./newsController");
-const { getTrainInfo, saveTrainInfoToDatabase, getUnesntTrains } = require("./trainController");
+const {
+  sendNewsMessages,
+  sendTrainMessages,
+} = require("../services/messageDistributor");
+const {
+  newsScrapeJob,
+  saveNewsToDatabase,
+  getNewsUnsentArticles,
+} = require("./newsController");
+const {
+  getTrainInfo,
+  saveTrainInfoToDatabase,
+  getUnesntTrains,
+} = require("./trainController");
 
 // NEWS N SCRAPER
 const runNewsScraper = async () => {
@@ -40,11 +51,11 @@ const sendTrain = async (client) => {
   await sendTrainMessages(client, trains);
   console.info("Trains sent successfully");
   return 0;
-}
+};
 
 module.exports = {
   runNewsScraper,
   sendNews,
   runTrainScraper,
-  sendTrain
+  sendTrain,
 };

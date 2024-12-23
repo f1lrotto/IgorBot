@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 
 const Train = require("../../models/train.mongo.js");
 
@@ -8,7 +8,8 @@ moment.tz.setDefault("Europe/Bratislava");
 const config = {
   train: {
     username: "NestiháčikVláčik",
-    avatarURL: "https://cdn.discordapp.com/attachments/457885524292665348/1166862329904898068/thomas-the-tank-engine-screaming-as-he-travels-through-v0-eeux64f7ahha1.png?ex=654c083a&is=6539933a&hm=1f4e63a5ff71421b8ca3689280e0ef2d3b28ebb986fcb67a92ecd9733b25b46d&"
+    avatarURL:
+      "https://cdn.discordapp.com/attachments/457885524292665348/1166862329904898068/thomas-the-tank-engine-screaming-as-he-travels-through-v0-eeux64f7ahha1.png?ex=654c083a&is=6539933a&hm=1f4e63a5ff71421b8ca3689280e0ef2d3b28ebb986fcb67a92ecd9733b25b46d&",
   },
 };
 
@@ -26,22 +27,27 @@ const getTrains = async () => {
     console.error("Error retrieving recent trains from database:", error);
     throw error;
   }
-}
-
+};
 
 function createTrainEmbed(train) {
   return new EmbedBuilder()
     .setColor(0xff0000)
     .setTitle(`💀💀💀 ${train.content} 💀💀💀`)
     .setURL(train.url)
-    .setAuthor({ name: 'Železničná spoločnosť Pohrebisko', url: 'https://mastodon.social/@zssk_mimoriadne', iconURL: config.train.avatarURL })
+    .setAuthor({
+      name: "Železničná spoločnosť Pohrebisko",
+      url: "https://mastodon.social/@zssk_mimoriadne",
+      iconURL: config.train.avatarURL,
+    })
     .setTimestamp(new Date(moment(train.date).toISOString()))
-    .setFooter({ text: 'ZSSK' });
+    .setFooter({ text: "ZSSK" });
 }
 
 function buidTrainDelayEmbeds(items) {
   // filter out the items to only those which have "mešk" in the content
-  items = items.filter(item => item.content.toLowerCase().includes("neoprávnene sa pohybujúcu"));
+  items = items.filter((item) =>
+    item.content.toLowerCase().includes("neoprávnene sa pohybujúcu")
+  );
   const embeds = items.map(createTrainEmbed);
   embeds.sort((a, b) => {
     return new Date(a.date) - new Date(b.date);
@@ -49,15 +55,16 @@ function buidTrainDelayEmbeds(items) {
   return embeds;
 }
 
-
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('train-death')
-    .setDescription('Returns recent train deaths'),
+    .setName("train-death")
+    .setDescription("Returns recent train deaths"),
   async execute(interaction) {
     const trains = await getTrains();
     const embeds = buidTrainDelayEmbeds(trains);
-    console.info(`Attempting to send ${embeds.length} train delay embeds to Discord`);
+    console.info(
+      `Attempting to send ${embeds.length} train delay embeds to Discord`
+    );
     // send only 10 embeds at most
     const batch = embeds.slice(0, 10);
     console.info(`Sending ${batch.length} embeds`);

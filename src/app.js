@@ -7,23 +7,24 @@ require("dotenv").config();
 
 const app = express();
 const PORT = process.env.PORT || 8000;
+const isLocal = process.env.NODE_ENV === "development";
 
 const jobQueue = [];
 
 const addToQueue = (job) => {
   jobQueue.push(job);
-  console.info('Job added to queue');
+  console.info("Job added to queue");
 };
 
 const processQueue = async () => {
   if (jobQueue.length > 0) {
     const job = jobQueue.shift();
     try {
-      console.info('Processing job from queue');
+      console.info("Processing job from queue");
       await job();
-      console.info('Job processed successfully');
+      console.info("Job processed successfully");
     } catch (error) {
-      console.error('Error processing job:', error);
+      console.error("Error processing job:", error);
     }
   }
 };
@@ -50,15 +51,24 @@ async function startApp() {
       console.info(`Server listening on port ${PORT}`);
     });
 
-    // Schedule jobs
-    cron.schedule("*/15 * * * *", () => addToQueue(executeNewsJobsSequentially));
-    cron.schedule("*/15 * * * *", () => addToQueue(executeTrainJobsSequentially));
+    // Schedule jobs only in production
+    if (!isLocal) {
+      console.info("Scheduling cron jobs for production environment");
+      cron.schedule("*/15 * * * *", () =>
+        addToQueue(executeNewsJobsSequentially)
+      );
+      cron.schedule("*/15 * * * *", () =>
+        addToQueue(executeTrainJobsSequentially)
+      );
 
-    // Process queue every minute
-    setInterval(processQueue, 60000);
+      // Process queue every minute
+      setInterval(processQueue, 60000);
 
-    // Start processing immediately
-    processQueue();
+      // Start processing immediately
+      processQueue();
+    } else {
+      console.info("Running in development mode - cron jobs disabled");
+    }
   } catch (error) {
     console.error("Failed to start the application:", error);
     process.exit(1);
@@ -66,26 +76,26 @@ async function startApp() {
 }
 
 // Endpoint to run the news scraper
-app.get('/runNewsScraper', async (req, res) => {
+app.get("/runNewsScraper", async (req, res) => {
   try {
     await controller.runNewsScraper();
     await controller.sendNews(client);
-    res.status(200).json({ message: 'News scraper executed successfully' });
+    res.status(200).json({ message: "News scraper executed successfully" });
   } catch (error) {
-    console.error('Error running news scraper:', error);
-    res.status(500).json({ error: 'Failed to run news scraper' });
+    console.error("Error running news scraper:", error);
+    res.status(500).json({ error: "Failed to run news scraper" });
   }
 });
 
 // Endpoint to run the train scraper
-app.get('/runTrainScraper', async (req, res) => {
+app.get("/runTrainScraper", async (req, res) => {
   try {
     await controller.runTrainScraper();
     await controller.sendTrain(client);
-    res.status(200).json({ message: 'Train scraper executed successfully' });
+    res.status(200).json({ message: "Train scraper executed successfully" });
   } catch (error) {
-    console.error('Error running train scraper:', error);
-    res.status(500).json({ error: 'Failed to run train scraper' });
+    console.error("Error running train scraper:", error);
+    res.status(500).json({ error: "Failed to run train scraper" });
   }
 });
 

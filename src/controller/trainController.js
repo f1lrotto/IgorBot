@@ -4,14 +4,16 @@ const axios = require("axios");
 const getTrainInfo = async () => {
   // get the mastodon posts from the zssk account through the api
   console.info("Getting ZSSK train info from the mastodon API");
-  const { data } = await axios.get("https://mastodon.social/api/v1/accounts/110689585617761822/statuses");
+  const { data } = await axios.get(
+    "https://mastodon.social/api/v1/accounts/110689585617761822/statuses"
+  );
 
-  return cleanResponse = data.map(item => ({
+  return (cleanResponse = data.map((item) => ({
     id: Number(item.id),
     date: item.created_at,
-    content: item.content.replace(/<[^>]+>/g, ''), // This will remove HTML tags
+    content: item.content.replace(/<[^>]+>/g, ""), // This will remove HTML tags
     url: item.url,
-  }));
+  })));
 };
 
 const saveTrainInfoToDatabase = async (trains) => {
@@ -26,8 +28,12 @@ const saveTrainInfoToDatabase = async (trains) => {
       coutner++;
     }
   });
-  console.info(`Saved ${coutner} trains to database, skipped ${trains.length - coutner} trains`);
-}
+  console.info(
+    `Saved ${coutner} trains to database, skipped ${
+      trains.length - coutner
+    } trains`
+  );
+};
 
 const getUnesntTrains = async () => {
   // get all trains that were not sent yet and set wasSent to true
@@ -42,12 +48,10 @@ const getUnesntTrains = async () => {
     return new Date(a.date) - new Date(b.date);
   });
   return trains;
-}
-
-
+};
 
 module.exports = {
   getTrainInfo,
   saveTrainInfoToDatabase,
-  getUnesntTrains
+  getUnesntTrains,
 };

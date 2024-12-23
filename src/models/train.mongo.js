@@ -21,7 +21,7 @@ const trainSchema = new mongoose.Schema(
       type: Boolean,
       required: true,
       default: false,
-    }
+    },
   },
   {
     versionKey: false,

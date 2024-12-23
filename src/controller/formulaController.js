@@ -1,28 +1,43 @@
-const axios = require('axios');
-const cheerio = require('cheerio');
+const axios = require("axios");
+const cheerio = require("cheerio");
 
-const formulaDatabase = require('../models/formula.mongo');
+const formulaDatabase = require("../models/formula.mongo");
 
 async function formulaScrapeJob() {
-  const response = await axios.get('https://www.formula1.com/en/latest/all.html#default');
+  const response = await axios.get(
+    "https://www.formula1.com/en/latest/all.html#default"
+  );
   const $ = cheerio.load(response.data);
 
   const articles = [];
-  $('.f1-latest-listing--grid-item').each((i, element) => {
-    const url = $(element).find('a').attr('href');
-    const title = $(element).find('.f1-cc--caption').children().eq(1).text();
+  $(".f1-latest-listing--grid-item").each((i, element) => {
+    const url = $(element).find("a").attr("href");
+    const title = $(element).find(".f1-cc--caption").children().eq(1).text();
     const scrapeDate = new Date();
-    const tag = $(element).find('.misc--tag').text().trim().replace(/\s+/g, ' ');
-    const image = $(element).find('.f1-cc--photo').find('.lazy').attr('data-src');
+    const tag = $(element)
+      .find(".misc--tag")
+      .text()
+      .trim()
+      .replace(/\s+/g, " ");
+    const image = $(element)
+      .find(".f1-cc--photo")
+      .find(".lazy")
+      .attr("data-src");
 
-    articles.push({ title, url: `https://www.formula1.com${url}`, scrapeDate, tag, image });
+    articles.push({
+      title,
+      url: `https://www.formula1.com${url}`,
+      scrapeDate,
+      tag,
+      image,
+    });
   });
 
   return articles;
 }
 
 async function saveFormulaToDatabase(articles) {
-  console.info('Attempting to save articles to database');
+  console.info("Attempting to save articles to database");
   let counter = 0;
   // save to database, but if already in mongo database, don't save
   articles.forEach(async (article) => {
@@ -33,12 +48,16 @@ async function saveFormulaToDatabase(articles) {
       counter++;
     }
   });
-  console.info(`Saved ${counter} articles to database, skipped ${articles.length - counter} articles`);
+  console.info(
+    `Saved ${counter} articles to database, skipped ${
+      articles.length - counter
+    } articles`
+  );
 }
 
 async function getUnsentFormula() {
   // get all articles that were not sent yet and set wasSent to true
-  console.info('Trying to retrieve unsent articles from database');
+  console.info("Trying to retrieve unsent articles from database");
   const articles = await formulaDatabase.find({ wasSent: false });
   console.info(`Found ${articles.length} unsent articles`);
   articles.forEach(async (article) => {
@@ -51,9 +70,8 @@ async function getUnsentFormula() {
   return articles;
 }
 
-
 module.exports = {
   formulaScrapeJob,
   saveFormulaToDatabase,
   getUnsentFormula,
-};  
+};
