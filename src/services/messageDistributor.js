@@ -54,15 +54,6 @@ function createTrainEmbed(train) {
         .setTimestamp();
 }
 
-function createFormulaEmbed(article) {
-    return new EmbedBuilder()
-        .setColor(0xFF0000)
-        .setTitle(article.title)
-        .setURL(article.link)
-        .setDescription(article.description)
-        .setTimestamp(new Date(article.pubDate));
-}
-
 async function distributeMessages(client, type, items, createEmbed) {
     try {
         // Get all server configurations that have this type of channel configured
@@ -101,9 +92,5 @@ module.exports = {
 
     async sendTrainMessages(client, trains) {
         await distributeMessages(client, 'train', trains, createTrainEmbed);
-    },
-
-    async sendFormulaMessages(client, articles) {
-        await distributeMessages(client, 'formula', articles, createFormulaEmbed);
     }
 };

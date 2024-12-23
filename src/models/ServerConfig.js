@@ -14,10 +14,6 @@ const serverConfigSchema = new mongoose.Schema({
         train: {
             type: String,
             default: null
-        },
-        formula: {
-            type: String,
-            default: null
         }
     },
     createdAt: {

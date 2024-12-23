@@ -40,12 +40,6 @@ const executeTrainJobsSequentially = async () => {
   await controller.sendTrain(client);
 };
 
-const executeFormulaJobsSequentially = async () => {
-  console.info("FORMULA: Executing a scheduled cronjob to scrape and send");
-  await controller.runFormulaScraper();
-  await controller.sendFormula(client);
-};
-
 async function startApp() {
   try {
     console.info("Connecting to MongoDB...");
@@ -59,7 +53,6 @@ async function startApp() {
     // Schedule jobs
     cron.schedule("*/15 * * * *", () => addToQueue(executeNewsJobsSequentially));
     cron.schedule("*/15 * * * *", () => addToQueue(executeTrainJobsSequentially));
-    cron.schedule("*/15 * * * *", () => addToQueue(executeFormulaJobsSequentially));
 
     // Process queue every minute
     setInterval(processQueue, 60000);
@@ -93,18 +86,6 @@ app.get('/runTrainScraper', async (req, res) => {
   } catch (error) {
     console.error('Error running train scraper:', error);
     res.status(500).json({ error: 'Failed to run train scraper' });
-  }
-});
-
-// Endpoint to run the formula scraper
-app.get('/runFormulaScraper', async (req, res) => {
-  try {
-    await controller.runFormulaScraper();
-    await controller.sendFormula(client);
-    res.status(200).json({ message: 'Formula scraper executed successfully' });
-  } catch (error) {
-    console.error('Error running formula scraper:', error);
-    res.status(500).json({ error: 'Failed to run formula scraper' });
   }
 });
 

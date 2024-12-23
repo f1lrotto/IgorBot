@@ -1,7 +1,6 @@
-const { sendNewsMessages, sendTrainMessages, sendFormulaMessages } = require("../services/messageDistributor");
+const { sendNewsMessages, sendTrainMessages } = require("../services/messageDistributor");
 const { newsScrapeJob, saveNewsToDatabase, getNewsUnsentArticles } = require("./newsController");
 const { getTrainInfo, saveTrainInfoToDatabase, getUnesntTrains } = require("./trainController");
-const { formulaScrapeJob, saveFormulaToDatabase, getUnsentFormula } = require("./formulaController");
 
 // NEWS N SCRAPER
 const runNewsScraper = async () => {
@@ -43,32 +42,9 @@ const sendTrain = async (client) => {
   return 0;
 }
 
-// FORMULA 1
-const runFormulaScraper = async () => {
-  const articles = await formulaScrapeJob();
-  await saveFormulaToDatabase(articles);
-  console.info("Formula scraper finished");
-  return 0;
-};
-
-const sendFormula = async (client) => {
-  console.info("Starting a job to send formula news to Discord servers");
-  const articles = await getUnsentFormula();
-  if (articles.length === 0) {
-    console.info("No formula news to send, 0 unsent articles found");
-    return 1;
-  }
-  await sendFormulaMessages(client, articles);
-  console.info("Formula news sent successfully");
-  return 0;
-};
-
-
 module.exports = {
   runNewsScraper,
   sendNews,
   runTrainScraper,
-  sendTrain,
-  runFormulaScraper,
-  sendFormula,
+  sendTrain
 };

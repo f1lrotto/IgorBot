@@ -11,8 +11,7 @@ module.exports = {
                 .setRequired(true)
                 .addChoices(
                     { name: 'News', value: 'news' },
-                    { name: 'Train', value: 'train' },
-                    { name: 'Formula', value: 'formula' },
+                    { name: 'Train', value: 'train' }
                 ))
         .addChannelOption(option =>
             option.setName('channel')
