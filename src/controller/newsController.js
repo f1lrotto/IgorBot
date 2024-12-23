@@ -47,7 +47,7 @@ const getNewsUnsentArticles = async () => {
   });
   // sort the articles by date from oldest to newest
   articles.sort((a, b) => {
-    return new Date(a.date) - new Date(b.date);
+    return new Date(b.articleTimestamp) - new Date(a.articleTimestamp);
   });
   return articles;
 };
