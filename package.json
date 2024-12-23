@@ -9,12 +9,13 @@
     "moment-timezone": "^0.5.43",
     "mongoose": "^7.5.2",
     "morgan": "^1.10.0",
-    "node-cron": "^3.0.0"
+    "node-cron": "^3.0.0",
+    "openai": "^4.77.0"
   },
   "name": "newsn-alert-bot",
   "description": "Server that sends every 15 minutes new articles on Minuta po minute through discord webhooks",
   "version": "1.0.0",
-    "engines": {
+  "engines": {
     "node": "18.x"
   },
   "main": "app.js",
