@@ -43,7 +43,7 @@ const getNewsUnsentArticles = async () => {
     .exec();
   console.info(`Found ${articles.length} unsent articles`);
   articles.forEach(async (article) => {
-    // await articlesDatabase.updateOne({ _id: article._id }, { wasSent: true });
+    await articlesDatabase.updateOne({ _id: article._id }, { wasSent: true });
   });
   // sort the articles by date from oldest to newest
   articles.sort((a, b) => {
