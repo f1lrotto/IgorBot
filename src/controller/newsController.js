@@ -53,7 +53,7 @@ const getNewsUnsentArticles = async () => {
 };
 
 const getYesterdayNews = async () => {
-  const yesterday = moment().subtract(0, "days");
+  const yesterday = moment().subtract(1, "days");
   const yesterdayStart = yesterday.startOf("day").toDate();
   const yesterdayEnd = yesterday.endOf("day").toDate();
   const articles = await articlesDatabase
