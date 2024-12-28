@@ -3,11 +3,18 @@ const cron = require("node-cron");
 const { connectMongo } = require("./services/mongo");
 const controller = require("./controller/mainController");
 const { client } = require("./services/discordBot");
+const { engine } = require('express-handlebars');
+const { getMorningNews } = require('./controller/morningReportController');
 require("dotenv").config();
 
 const app = express();
 const PORT = process.env.PORT || 8000;
 const isLocal = process.env.NODE_ENV === "development";
+
+// Set up Handlebars
+app.engine('handlebars', engine());
+app.set('view engine', 'handlebars');
+app.set('views', './src/views');
 
 const jobQueue = [];
 
@@ -114,5 +121,8 @@ app.get("/runTrainScraper", async (req, res) => {
     res.status(500).json({ error: "Failed to run train scraper" });
   }
 });
+
+// Morning news route
+app.get('/morning-news', getMorningNews);
 
 startApp();

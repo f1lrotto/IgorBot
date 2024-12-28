@@ -1,9 +1,11 @@
 const OpenAI = require("openai");
+const marked = require('marked');
+
 const MorningNews = require('../models/morningNews.mongo');
 
 // Initialize OpenAI client
 const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY, // This is the default and can be omitted
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 const systemPrompt =
@@ -61,4 +63,28 @@ Theme: ${article.theme}
   }
 }
 
-module.exports = { makeMorningNewsReport };
+async function getMorningNews(req, res) {
+  try {
+    // Get the latest 10 morning news reports, sorted by date in descending order
+    const newsReports = await MorningNews.find()
+      .sort({ date: -1 })
+      .limit(10)
+      .lean();
+
+    // Convert markdown to HTML for each report
+    newsReports.forEach(report => {
+      report.content = marked.parse(report.content);
+    });
+
+    // Render the page with the news reports
+    res.render('morningNews', { 
+      newsReports,
+      title: 'Ranné Správy'
+    });
+  } catch (error) {
+    console.error('Error fetching morning news:', error);
+    res.status(500).send('Internal Server Error');
+  }
+}
+
+module.exports = { makeMorningNewsReport, getMorningNews };
