@@ -77,8 +77,8 @@ async function getMorningNews(req, res) {
             .skip(skip)
             .limit(limit);
 
-        res.render('morningNews', {
-            newsReports: newsReports.map(report => ({
+        res.render('news', {
+            items: newsReports.map(report => ({
                 content: marked.parse(report.content)
             })),
             pagination: {
@@ -86,7 +86,8 @@ async function getMorningNews(req, res) {
                 totalPages,
                 hasNext: page < totalPages,
                 hasPrev: page > 1
-            }
+            },
+            title: 'Good Morning™'
         });
     } catch (error) {
         console.error('Error fetching morning news:', error);

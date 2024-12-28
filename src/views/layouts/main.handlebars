@@ -35,6 +35,24 @@
             color: #ffffff;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
+        .nav {
+            background: #3d405b;
+            padding: 0.5rem;
+            text-align: center;
+        }
+        .nav a {
+            color: #fff;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            margin: 0 0.5rem;
+            border-radius: 4px;
+            border: none;
+            transition: background 0.2s;
+        }
+        .nav a:hover {
+            background: #81b29a;
+            border: none;
+        }
         a {
             color: #3d405b;
             text-decoration: none;
@@ -51,6 +69,11 @@
             <h1>Igorove Správy</h1>
         </div>
     </header>
+    <nav class="nav">
+        <a href="/">Good Morning™</a>
+        <a href="/spravy">Správy</a>
+        <a href="/vlaky">Vlaky</a>
+    </nav>
     <div class="container">
         {{{body}}}
     </div>

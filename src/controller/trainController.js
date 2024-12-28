@@ -1,5 +1,6 @@
 const Train = require("../models/train.mongo.js");
 const axios = require("axios");
+const marked = require("marked");
 
 const getTrainInfo = async () => {
   // get the mastodon posts from the zssk account through the api
@@ -50,8 +51,41 @@ const getUnesntTrains = async () => {
   return trains;
 };
 
+const getTrainFeed = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = 10;
+        const skip = (page - 1) * limit;
+
+        const totalTrains = await Train.countDocuments();
+        const totalPages = Math.ceil(totalTrains / limit);
+
+        const trains = await Train.find()
+            .sort({ date: -1 })
+            .skip(skip)
+            .limit(limit);
+
+        res.render('news', {
+            items: trains.map(train => ({
+                content: marked.parse(`## ${train.content}\n\n*${new Date(train.date).toLocaleString('sk-SK')}*\n\n[Zobraziť na Mastodon »](${train.url})`)
+            })),
+            pagination: {
+                currentPage: page,
+                totalPages,
+                hasNext: page < totalPages,
+                hasPrev: page > 1
+            },
+            title: 'Vlaky'
+        });
+    } catch (error) {
+        console.error('Error fetching train updates:', error);
+        res.status(500).render('error', { message: 'Chyba pri načítaní aktualizácií vlakov.' });
+    }
+};
+
 module.exports = {
   getTrainInfo,
   saveTrainInfoToDatabase,
   getUnesntTrains,
+  getTrainFeed,
 };

@@ -5,6 +5,8 @@ const controller = require("./controller/mainController");
 const { client } = require("./services/discordBot");
 const { engine } = require('express-handlebars');
 const { getMorningNews } = require('./controller/morningReportController');
+const { getNewsFeed } = require('./controller/newsFeedController');
+const { getTrainFeed } = require('./controller/trainController');
 require("dotenv").config();
 
 const app = express();
@@ -129,6 +131,8 @@ app.get("/runTrainScraper", async (req, res) => {
 });
 
 // Morning news route
-app.get('/morning-news', getMorningNews);
+app.get('/', getMorningNews);
+app.get('/spravy', getNewsFeed);
+app.get('/vlaky', getTrainFeed);
 
 startApp();

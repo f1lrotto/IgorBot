@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Ranné Správy</title>
+    <title>{{title}}</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -65,15 +65,15 @@
 </head>
 <body>
     <div class="news-container">
-        {{#each newsReports}}
+        {{#each items}}
             <div class="news-item">
                 {{{content}}}
             </div>
         {{else}}
-            <p>Žiadne ranné správy nie sú k dispozícii.</p>
+            <p>Žiadne správy nie sú k dispozícii.</p>
         {{/each}}
     </div>
-    
+
     {{#if pagination}}
     <div class="pagination">
         {{#if pagination.hasPrev}}
