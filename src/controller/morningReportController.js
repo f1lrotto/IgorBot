@@ -24,8 +24,8 @@ async function makeMorningNewsReport(articles) {
   const report = articles
     .map((article) => {
       return `
-Title: ${article.headline}
-Content: ${article.articleContent}
+Title: ${article.headline + article.articleContent}
+Content: ${article.fullContent}
 URL: ${article.articleUrl}
 Category: ${article.category}
 Theme: ${article.theme}
