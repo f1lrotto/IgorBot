@@ -111,6 +111,53 @@ const distributeMessages = async (client, channelType, messages, createEmbed) =>
   }
 };
 
+const splitMessage = (message, maxLength = 2000) => {
+  // Sanitize message by removing "---"
+  message = message.replace(/---/g, '');
+  
+  if (message.length <= maxLength) {
+    return [message];
+  }
+
+  const chunks = [];
+  let currentChunk = '';
+
+  const lines = message.split('\n');
+  
+  for (const line of lines) {
+    // If adding this line would exceed maxLength
+    if (currentChunk.length + line.length + 1 > maxLength) {
+      // If current chunk is empty but line is longer than maxLength
+      if (!currentChunk && line.length > maxLength) {
+        // Split at word boundaries
+        let remainingLine = line;
+        while (remainingLine.length > maxLength) {
+          const splitIndex = remainingLine.lastIndexOf(' ', maxLength);
+          const chunk = splitIndex === -1 
+            ? remainingLine.substring(0, maxLength)
+            : remainingLine.substring(0, splitIndex);
+          
+          chunks.push(chunk);
+          remainingLine = remainingLine.substring(chunk.length + 1);
+        }
+        if (remainingLine) currentChunk = remainingLine;
+      } else {
+        // Push current chunk and start new one
+        chunks.push(currentChunk.trim());
+        currentChunk = line;
+      }
+    } else {
+      currentChunk += (currentChunk ? '\n' : '') + line;
+    }
+  }
+  
+  if (currentChunk) {
+    chunks.push(currentChunk.trim());
+  }
+  
+  return chunks;
+};
+
 const distributePlainMessage = async (client, channelType, message) => {
   try {
     const servers = await ServerConfig.find({
@@ -122,16 +169,20 @@ const distributePlainMessage = async (client, channelType, message) => {
       return;
     }
 
+    const messageChunks = splitMessage(message);
+
     for (const server of servers) {
       const channelId = server.channels[channelType];
       const channel = await client.channels.fetch(channelId);
       
       if (channel) {
-        await channel.send({
-          content: message,
-          flags: ['SuppressEmbeds']
-        });
-        console.info(`Message sent to server ${server.guildId} for ${channelType}`);
+        for (const chunk of messageChunks) {
+          await channel.send({
+            content: chunk,
+            flags: ['SuppressEmbeds']
+          });
+        }
+        console.info(`Message (${messageChunks.length} chunks) sent to server ${server.guildId} for ${channelType}`);
       }
     }
   } catch (error) {

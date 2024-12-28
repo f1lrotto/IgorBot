@@ -65,7 +65,7 @@ async function startApp() {
       cron.schedule("*/15 * * * *", () =>
         addToQueue(executeTrainJobsSequentially)
       );
-      cron.schedule("0 8 * * *", () => addToQueue(sendMorningNews));
+      cron.schedule("0 6 * * *", () => addToQueue(sendMorningNews));
 
       // Process queue every minute
       setInterval(processQueue, 60000);
