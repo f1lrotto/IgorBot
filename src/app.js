@@ -12,7 +12,13 @@ const PORT = process.env.PORT || 8000;
 const isLocal = process.env.NODE_ENV === "development";
 
 // Set up Handlebars
-app.engine('handlebars', engine());
+app.engine('handlebars', engine({
+  defaultLayout: 'main',
+  helpers: {
+    add: (a, b) => a + b,
+    subtract: (a, b) => a - b
+  }
+}));
 app.set('view engine', 'handlebars');
 app.set('views', './src/views');
 

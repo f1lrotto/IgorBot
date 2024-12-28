@@ -15,6 +15,7 @@
             padding: 2rem;
             border: 2px solid #2b2b2b;
             box-shadow: 4px 4px 0 #2b2b2b;
+            margin-bottom: 2rem;
         }
         .news-item {
             margin-bottom: 2rem;
@@ -35,6 +36,31 @@
             padding: 2px 4px;
             border-radius: 3px;
         }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        .pagination a {
+            padding: 0.5rem 1rem;
+            background: #3d405b;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        .pagination a:hover {
+            background: #81b29a;
+        }
+        .pagination .current-page {
+            font-weight: bold;
+        }
+        .pagination a.disabled {
+            background: #ccc;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
@@ -47,5 +73,23 @@
             <p>Žiadne ranné správy nie sú k dispozícii.</p>
         {{/each}}
     </div>
+    
+    {{#if pagination}}
+    <div class="pagination">
+        {{#if pagination.hasPrev}}
+            <a href="?page={{subtract pagination.currentPage 1}}">&laquo; Predchádzajúce</a>
+        {{else}}
+            <a class="disabled">&laquo; Predchádzajúce</a>
+        {{/if}}
+        
+        <span class="current-page">Strana {{pagination.currentPage}} z {{pagination.totalPages}}</span>
+        
+        {{#if pagination.hasNext}}
+            <a href="?page={{add pagination.currentPage 1}}">Nasledujúce &raquo;</a>
+        {{else}}
+            <a class="disabled">Nasledujúce &raquo;</a>
+        {{/if}}
+    </div>
+    {{/if}}
 </body>
 </html>
