@@ -1,4 +1,5 @@
 const OpenAI = require("openai");
+const MorningNews = require('../models/morningNews.mongo');
 
 // Initialize OpenAI client
 const client = new OpenAI({
@@ -45,13 +46,18 @@ Theme: ${article.theme}
       ],
     });
 
-    return response.choices[0].message.content;
+    const generatedContent = response.choices[0].message.content;
+
+    // Save the morning news report to the database
+    await MorningNews.create({
+      date: new Date(),
+      content: generatedContent,
+    });
+
+    return generatedContent;
   } catch (error) {
-    console.error(
-      "Error generating news message:",
-      error.response?.data || error.message
-    );
-    return null;
+    console.error("Error generating news message:", error);
+    throw error;
   }
 }
 
