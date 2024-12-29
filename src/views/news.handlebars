@@ -67,7 +67,12 @@
     <div class="news-container">
         {{#each items}}
             <div class="news-item">
+                {{{headline}}}
                 {{{content}}}
+                {{#if image}}
+                <img src="{{image}}" alt="News Image" style="max-width: 100%; height: auto; margin: 1rem 0;">
+                {{/if}}
+                {{{metadata}}}
             </div>
         {{else}}
             <p>Žiadne správy nie sú k dispozícii.</p>

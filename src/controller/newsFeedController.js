@@ -17,7 +17,10 @@ async function getNewsFeed(req, res) {
 
         res.render('news', {
             items: articles.map(article => ({
-                content: marked.parse(`## ${article.headline}\n${article.articleContent}\n\n*${article.category} • ${article.articleDate} ${article.articleTime}${article.source ? ` • ${article.source}` : ''}*\n\n${article.articleUrl ? `[Čítať viac »](${article.articleUrl})` : ''}`)
+                headline: marked.parse(`## ${article.headline}`),
+                content: marked.parse(article.articleContent),
+                metadata: marked.parse(`*${article.category} • ${article.articleDate} ${article.articleTime}${article.source ? ` • ${article.source}` : ''}*\n\n${article.articleUrl ? `[Čítať viac »](${article.articleUrl})` : ''}`),
+                image: article.img
             })),
             pagination: {
                 currentPage: page,
