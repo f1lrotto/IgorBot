@@ -48,6 +48,9 @@ Theme: ${article.theme}
       ],
     });
 
+    const usage = response.usage || {};
+    console.log(`Credits used for this request: ${usage.total_tokens || 'Not available'}`);
+
     const generatedContent = response.choices[0].message.content;
 
     // Save the morning news report to the database
