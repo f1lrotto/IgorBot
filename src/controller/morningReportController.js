@@ -41,7 +41,7 @@ Theme: ${article.theme}
   try {
     // Call OpenAI API to generate the news report
     const response = await client.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4o-mini",
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: fullUserPrompt },
