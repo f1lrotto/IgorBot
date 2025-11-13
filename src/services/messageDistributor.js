@@ -4,6 +4,13 @@ const moment = require("moment-timezone");
 
 moment.tz.setDefault("Europe/Bratislava");
 
+const config = {
+  train: {
+    avatarURL:
+      "https://cdn.discordapp.com/attachments/457885524292665348/1166862329904898068/thomas-the-tank-engine-screaming-as-he-travels-through-v0-eeux64f7ahha1.png?ex=654c083a&is=6539933a&hm=1f4e63a5ff71421b8ca3689280e0ef2d3b28ebb986fcb67a92ecd9733b25b46d&",
+  },
+};
+
 const sourceConfig = {
   SME: {
     color: 0xd45959,
@@ -25,21 +32,21 @@ function createNewsEmbed(article) {
   };
 
   const fields = [];
-  
+
   // Add category field
-  fields.push({ 
-    name: "Kategória", 
+  fields.push({
+    name: "Kategória",
     value: category,
-    inline: true 
+    inline: true
   });
 
   // Add themes if they exist
   if (article.theme && article.theme.length > 0) {
     const name = article.theme.length > 1 ? "Témy" : "Téma";
-    fields.push({ 
-      name, 
-      value: article.theme.join("\n"), 
-      inline: true 
+    fields.push({
+      name,
+      value: article.theme.join("\n"),
+      inline: true
     });
   }
 
@@ -114,7 +121,7 @@ const distributeMessages = async (client, channelType, messages, createEmbed) =>
 const splitMessage = (message, maxLength = 2000) => {
   // Sanitize message by removing "---"
   message = message.replace(/---/g, '');
-  
+
   if (message.length <= maxLength) {
     return [message];
   }
@@ -123,7 +130,7 @@ const splitMessage = (message, maxLength = 2000) => {
   let currentChunk = '';
 
   const lines = message.split('\n');
-  
+
   for (const line of lines) {
     // If adding this line would exceed maxLength
     if (currentChunk.length + line.length + 1 > maxLength) {
@@ -133,10 +140,10 @@ const splitMessage = (message, maxLength = 2000) => {
         let remainingLine = line;
         while (remainingLine.length > maxLength) {
           const splitIndex = remainingLine.lastIndexOf(' ', maxLength);
-          const chunk = splitIndex === -1 
+          const chunk = splitIndex === -1
             ? remainingLine.substring(0, maxLength)
             : remainingLine.substring(0, splitIndex);
-          
+
           chunks.push(chunk);
           remainingLine = remainingLine.substring(chunk.length + 1);
         }
@@ -150,11 +157,11 @@ const splitMessage = (message, maxLength = 2000) => {
       currentChunk += (currentChunk ? '\n' : '') + line;
     }
   }
-  
+
   if (currentChunk) {
     chunks.push(currentChunk.trim());
   }
-  
+
   return chunks;
 };
 
@@ -174,7 +181,7 @@ const distributePlainMessage = async (client, channelType, message) => {
     for (const server of servers) {
       const channelId = server.channels[channelType];
       const channel = await client.channels.fetch(channelId);
-      
+
       if (channel) {
         for (const chunk of messageChunks) {
           await channel.send({
