@@ -5,15 +5,14 @@ const moment = require("moment-timezone");
 // Configuration object for selectors and constants
 const CONFIG = {
   selectors: {
-    articleWrapper: ".js-article-short-list-wrapper > div",
-    dateElement: ".article-short-side-content div a.fs-16",
-    timeElement: ".sans-bold.fs-16.article-short-time a",
-    categoryElement: ".sans-reg.fs-12",
-    contentWrapper: ".article-short-content p",
-    contentLink: ".article-short-content p a",
-    headlineInLink: ".article-short-content p strong a",
-    headlineStandalone: ".article-short-content p strong:not(:has(a))",
-    themeElements: ".btn.btn-s.btn-border.mb-xxs",
+    articleWrapper: ".listing__item",
+    timeElement: ".meta__time",
+    categoryElement: ".meta__title",
+    importantTag: ".tag--minute-important",
+    contentWrapper: ".listing__item-content",
+    contentParagraph: ".listing__item-content > p",
+    contentLink: "a.link--underline",
+    imageElement: ".listing__item-content img",
     articleContent: ".js-remp-article-data.cf.js-font-resize.js-article-stats-item",
     excludeElements: [
       ".share-box",
@@ -29,6 +28,7 @@ const CONFIG = {
   defaults: {
     timezone: "Europe/Bratislava",
     dateFormat: "D. M. YYYY",
+    timeFormat: "HH:mm",
     dateTimeFormat: "D. M. YYYY HH:mm",
     defaultUrl: "https://www.sme.sk/minuta/dolezite-spravy",
     source: "SME",
@@ -90,86 +90,68 @@ const parseArticle = async ($, element) => {
   try {
     const mainDiv = $(element);
 
-    // Skip promo articles
-    if (mainDiv.children().eq(0).hasClass("artemis-promo-labels")) {
-      console.info('Skipping promo article');
-      return null;
-    }
-
-    const articleId = mainDiv.attr("data-article-id");
+    // Get article ID from data attribute
+    const articleId = mainDiv.attr("data-js-minute-post-id");
     if (!articleId) {
-      console.warn('Article element has no data-article-id attribute, skipping');
+      console.warn('Article element has no data-js-minute-post-id attribute, skipping');
       return null;
     }
     console.info(`Parsing article with ID: ${articleId}`);
 
-    const img = mainDiv.find("img").attr("src");
-
-    // Date and time processing
-    const dateElement = mainDiv.find(CONFIG.selectors.dateElement);
-    const articleDate = safeExtract(
-      dateElement,
-      moment().tz(CONFIG.defaults.timezone).format(CONFIG.defaults.dateFormat)
-    );
-
+    // Get time and create timestamp (use today's date since only time is provided)
     const articleTime = safeExtract(mainDiv.find(CONFIG.selectors.timeElement));
+    if (!articleTime) {
+      console.warn(`Article ${articleId} has no time, skipping`);
+      return null;
+    }
+
+    const articleDate = moment().tz(CONFIG.defaults.timezone).format(CONFIG.defaults.dateFormat);
     const articleTimestamp = moment(
       `${articleDate} ${articleTime}`,
       CONFIG.defaults.dateTimeFormat
     ).toISOString();
 
-    // Content processing
+    // Get category
     const category = safeExtract(mainDiv.find(CONFIG.selectors.categoryElement));
 
-    // Improved headline extraction
-    const paragraphElement = mainDiv.find(CONFIG.selectors.contentWrapper);
-    const strongElement = paragraphElement.find('strong').first();
-    const headlineLink = strongElement.find('a').first();
+    // Check if it's marked as important
+    const isImportant = mainDiv.find(CONFIG.selectors.importantTag).length > 0;
 
-    let headline = '';
-    let articleContent = '';
+    // Get content and link
+    const contentWrapper = mainDiv.find(CONFIG.selectors.contentWrapper);
+    const paragraphElement = contentWrapper.find('p').first();
+    const link = paragraphElement.find(CONFIG.selectors.contentLink).first();
 
-    // Get the full paragraph text first
-    const fullParagraphText = safeExtract(paragraphElement);
-
-    if (headlineLink.length > 0) {
-      // If there's a link in the strong tag, that's our headline
-      headline = safeExtract(headlineLink);
-      // Remove the headline from the content
-      articleContent = fullParagraphText.replace(headline, '').trim();
-    } else if (strongElement.length > 0) {
-      // If there's just a strong tag, that's our headline
-      headline = safeExtract(strongElement);
-      articleContent = fullParagraphText.replace(headline, '').trim();
+    // Extract headline from link text
+    const headline = safeExtract(link);
+    if (!headline) {
+      console.warn(`Article ${articleId} has no headline, skipping`);
+      return null;
     }
 
-    // Clean up the content
-    articleContent = articleContent.replace(/^\s*[.,]\s*/, ''); // Remove leading punctuation
-    if (articleContent.includes("Čítaj ďalej")) {
-      articleContent = articleContent.split("Čítaj ďalej")[0].trim();
-    }
-
-    // URL processing with validation
-    const articleLink = headlineLink.length > 0 ? headlineLink : mainDiv.find(CONFIG.selectors.contentLink);
-    let articleUrl = articleLink.attr("href");
+    // Get article URL
+    let articleUrl = link.attr("href");
     if (!articleUrl || articleUrl === "javascript: void(0);") {
+      console.warn(`Article ${articleId} has no valid URL`);
       articleUrl = CONFIG.defaults.defaultUrl;
     }
 
-    // Theme processing
-    const theme = [];
-    mainDiv.find(CONFIG.selectors.themeElements).each((i, el) => {
-      const themeText = $(el).text().trim();
-      if (themeText) theme.push(themeText);
-    });
+    // Get full paragraph text as content (remove the link text to get description)
+    const fullParagraphText = safeExtract(paragraphElement);
+    let articleContent = fullParagraphText.replace(headline, '').trim();
+    articleContent = articleContent.replace(/^[,\s]+/, ''); // Remove leading commas/spaces
+
+    // Get image if present
+    const img = contentWrapper.find(CONFIG.selectors.imageElement).attr("src");
 
     // Fetch full article content if URL is available
     let fullContent = null;
     if (articleUrl && articleUrl !== CONFIG.defaults.defaultUrl) {
+      console.info(`Fetching full content for article ${articleId}`);
       fullContent = await fetchArticleContent(articleUrl);
     }
 
-    return {
+    const article = {
       articleId,
       articleTime,
       articleDate,
@@ -179,12 +161,19 @@ const parseArticle = async ($, element) => {
       articleContent,
       articleUrl,
       source: CONFIG.defaults.source,
-      ...(theme.length > 0 && { theme }),
       ...(img && { img }),
       ...(fullContent && { fullContent }),
     };
+
+    // Add important tag as theme if present
+    if (isImportant) {
+      article.theme = ["Dôležité"];
+    }
+
+    return article;
   } catch (error) {
     console.error(`Error parsing article: ${error.message}`);
+    console.error(`Stack trace:`, error.stack);
     return null;
   }
 };
