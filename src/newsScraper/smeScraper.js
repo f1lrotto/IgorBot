@@ -141,8 +141,16 @@ const parseArticle = async ($, element) => {
     let articleContent = fullParagraphText.replace(headline, '').trim();
     articleContent = articleContent.replace(/^[,\s]+/, ''); // Remove leading commas/spaces
 
-    // Get image if present
-    const img = contentWrapper.find(CONFIG.selectors.imageElement).attr("src");
+    // Get image if present - try multiple selectors
+    let img = null;
+    const imageElement = contentWrapper.find('img').first();
+    if (imageElement.length > 0) {
+      // Try src first, then data-src for lazy-loaded images
+      img = imageElement.attr('src') || imageElement.attr('data-src');
+      console.info(`Found image for article ${articleId}: ${img ? img.substring(0, 60) + '...' : 'none'}`);
+    } else {
+      console.info(`No image found for article ${articleId}`);
+    }
 
     // Fetch full article content if URL is available
     let fullContent = null;
