@@ -19,7 +19,7 @@
   "description": "Server that sends every 15 minutes new articles on Minuta po minute through discord webhooks",
   "version": "1.0.0",
   "engines": {
-    "node": "18.x"
+    "node": "24.x"
   },
   "main": "app.js",
   "scripts": {
