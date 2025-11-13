@@ -18,21 +18,24 @@ const {
 
 // NEWS N SCRAPER
 const runNewsScraper = async () => {
+  console.info("=== NEWS SCRAPER STARTED ===");
   const articles = await newsScrapeJob();
+  console.info(`Scraper returned ${articles.length} articles`);
   await saveNewsToDatabase(articles);
-  console.info("News scraper finished");
+  console.info("=== NEWS SCRAPER FINISHED ===");
   return 0;
 };
 
 const sendNews = async (client) => {
-  console.info("Starting a job to send news to Discord servers");
+  console.info("=== SEND NEWS STARTED ===");
   const articles = await getNewsUnsentArticles();
   if (articles.length === 0) {
     console.info("No news to send, 0 unsent articles found");
     return 1;
   }
+  console.info(`Sending ${articles.length} articles to Discord servers`);
   await sendNewsMessages(client, articles);
-  console.info("News sent successfully");
+  console.info("=== NEWS SENT SUCCESSFULLY ===");
   return 0;
 };
 

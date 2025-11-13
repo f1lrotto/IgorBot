@@ -89,26 +89,29 @@ const fetchArticleContent = async (url) => {
 const parseArticle = async ($, element) => {
   try {
     const mainDiv = $(element);
-    
+
     // Skip promo articles
     if (mainDiv.children().eq(0).hasClass("artemis-promo-labels")) {
+      console.info('Skipping promo article');
       return null;
     }
 
     const articleId = mainDiv.attr("data-article-id");
     if (!articleId) {
+      console.warn('Article element has no data-article-id attribute, skipping');
       return null;
     }
+    console.info(`Parsing article with ID: ${articleId}`);
 
     const img = mainDiv.find("img").attr("src");
-    
+
     // Date and time processing
     const dateElement = mainDiv.find(CONFIG.selectors.dateElement);
     const articleDate = safeExtract(
       dateElement,
       moment().tz(CONFIG.defaults.timezone).format(CONFIG.defaults.dateFormat)
     );
-    
+
     const articleTime = safeExtract(mainDiv.find(CONFIG.selectors.timeElement));
     const articleTimestamp = moment(
       `${articleDate} ${articleTime}`,
@@ -117,18 +120,18 @@ const parseArticle = async ($, element) => {
 
     // Content processing
     const category = safeExtract(mainDiv.find(CONFIG.selectors.categoryElement));
-    
+
     // Improved headline extraction
     const paragraphElement = mainDiv.find(CONFIG.selectors.contentWrapper);
     const strongElement = paragraphElement.find('strong').first();
     const headlineLink = strongElement.find('a').first();
-    
+
     let headline = '';
     let articleContent = '';
-    
+
     // Get the full paragraph text first
     const fullParagraphText = safeExtract(paragraphElement);
-    
+
     if (headlineLink.length > 0) {
       // If there's a link in the strong tag, that's our headline
       headline = safeExtract(headlineLink);
@@ -139,7 +142,7 @@ const parseArticle = async ($, element) => {
       headline = safeExtract(strongElement);
       articleContent = fullParagraphText.replace(headline, '').trim();
     }
-    
+
     // Clean up the content
     articleContent = articleContent.replace(/^\s*[.,]\s*/, ''); // Remove leading punctuation
     if (articleContent.includes("Čítaj ďalej")) {
@@ -188,27 +191,42 @@ const parseArticle = async ($, element) => {
 
 const scrapeOverview = async (url) => {
   console.info(`Starting scrape of ${url}`);
-  
+
   try {
+    console.info('Fetching page with axios...');
     const response = await axios.get(url, {
       headers: {
         "Cache-Control": "no-cache",
         Pragma: "no-cache",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
       },
     });
+    console.info(`Page fetched successfully. Status: ${response.status}, Content length: ${response.data.length}`);
 
     const $ = cheerio.load(response.data);
+    const articleElements = $(CONFIG.selectors.articleWrapper);
+    console.info(`Found ${articleElements.length} article elements with selector: "${CONFIG.selectors.articleWrapper}"`);
+
+    if (articleElements.length === 0) {
+      console.warn('No articles found. The page structure might have changed.');
+      console.info('Trying to log first 1000 chars of page HTML:');
+      console.info(response.data.substring(0, 1000));
+    }
+
     const articles = [];
 
     // Process articles sequentially to avoid overwhelming the server
-    for (const element of $(CONFIG.selectors.articleWrapper).toArray()) {
+    for (const element of articleElements.toArray()) {
       const article = await parseArticle($, element);
       if (article) {
-        console.info(`Scraped article ${article.articleId}-${article.headline}`);
+        console.info(`✓ Scraped article ${article.articleId}: ${article.headline.substring(0, 50)}...`);
         articles.push(article);
+      } else {
+        console.info('✗ Article was skipped (null result from parseArticle)');
       }
     }
 
+    console.info(`Successfully scraped ${articles.length} articles`);
     return articles;
   } catch (error) {
     if (axios.isAxiosError(error)) {
@@ -218,6 +236,7 @@ const scrapeOverview = async (url) => {
       }
     } else {
       console.error(`Error scraping overview page: ${error.message}`);
+      console.error(`Stack trace:`, error.stack);
     }
     return [];
   }

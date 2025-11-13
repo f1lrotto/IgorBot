@@ -14,24 +14,37 @@ const newsScrapeJob = async () => {
 };
 
 const saveNewsToDatabase = async (articles) => {
-  console.info("Attempting to save articles to database");
-  let coutner = 0;
-  // save to database, but if already in mongo database, don't save
-  articles.forEach(async (article) => {
-    const articleExists = await articlesDatabase.exists({
-      articleId: article.articleId,
-    });
-    if (!articleExists) {
-      console.info(`Saving article ${article.articleId} to database`);
-      await articlesDatabase.create(article);
-      coutner++;
+  console.info(`Attempting to save ${articles.length} articles to database`);
+
+  if (articles.length === 0) {
+    console.info('No articles to save');
+    return;
+  }
+
+  let saved = 0;
+  let skipped = 0;
+
+  // Use for...of instead of forEach to properly handle async/await
+  for (const article of articles) {
+    try {
+      const articleExists = await articlesDatabase.exists({
+        articleId: article.articleId,
+      });
+
+      if (!articleExists) {
+        console.info(`Saving new article ${article.articleId}: ${article.headline.substring(0, 50)}...`);
+        await articlesDatabase.create(article);
+        saved++;
+      } else {
+        console.info(`Skipping existing article ${article.articleId}`);
+        skipped++;
+      }
+    } catch (error) {
+      console.error(`Error saving article ${article.articleId}:`, error.message);
     }
-  });
-  console.info(
-    `Saved ${coutner} articles to database, skipped ${
-      articles.length - coutner
-    } articles`
-  );
+  }
+
+  console.info(`Saved ${saved} articles to database, skipped ${skipped} articles`);
 };
 
 const getNewsUnsentArticles = async () => {
@@ -42,9 +55,16 @@ const getNewsUnsentArticles = async () => {
     .lean()
     .exec();
   console.info(`Found ${articles.length} unsent articles`);
-  articles.forEach(async (article) => {
-    await articlesDatabase.updateOne({ _id: article._id }, { wasSent: true });
-  });
+
+  if (articles.length > 0) {
+    console.info(`Marking ${articles.length} articles as sent...`);
+    // Use for...of instead of forEach to properly handle async/await
+    for (const article of articles) {
+      await articlesDatabase.updateOne({ _id: article._id }, { wasSent: true });
+      console.info(`Marked article ${article.articleId} as sent`);
+    }
+  }
+
   // sort the articles by date from oldest to newest
   articles.sort((a, b) => {
     return new Date(b.articleTimestamp) - new Date(a.articleTimestamp);
