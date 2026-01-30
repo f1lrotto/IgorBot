@@ -70,4 +70,7 @@ if (!token) {
 }
 client.login(token);
 
-module.exports = { client };
+module.exports = {
+  client,
+  getClient: () => client,
+};
