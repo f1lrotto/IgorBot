@@ -1,8 +1,11 @@
 const { EmbedBuilder } = require("discord.js");
 const moment = require("moment-timezone");
-const discordBot = require("./discordBot");
 
 moment.tz.setDefault("Europe/Bratislava");
+
+function getDiscordBot() {
+  return require("./discordBot");
+}
 
 function createRssEmbed(item, feed) {
   const style = feed.cardStyle || {};
@@ -52,7 +55,7 @@ function createRssEmbed(item, feed) {
 class MessageDistributor {
   async sendRssItems(feed, items) {
     try {
-      const client = discordBot.getClient();
+      const client = getDiscordBot().getClient();
       
       if (!client) {
         console.error("Discord client not available");
@@ -89,7 +92,7 @@ class MessageDistributor {
 
   async sendRssItemPreview(feed, item) {
     try {
-      const client = discordBot.getClient();
+      const client = getDiscordBot().getClient();
       
       if (!client) {
         console.error("Discord client not available");

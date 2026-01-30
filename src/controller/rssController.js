@@ -1,7 +1,6 @@
 const RssFeed = require("../models/RssFeed");
 const RssItem = require("../models/RssItem");
 const rssParser = require("../services/rssParser");
-const messageDistributor = require("../services/messageDistributor");
 const smeRssAdapter = require("../services/smeRssAdapter");
 
 class RssController {
@@ -154,6 +153,7 @@ class RssController {
     await feed.save();
 
     if (newItems.length > 0) {
+      const messageDistributor = require("../services/messageDistributor");
       await messageDistributor.sendRssItems(feed, newItems);
     }
 
@@ -214,6 +214,7 @@ class RssController {
         isActive: true,
       });
 
+      const messageDistributor = require("../services/messageDistributor");
       for (const targetFeed of targetFeeds) {
         await messageDistributor.sendRssItems(targetFeed, newItems);
       }
