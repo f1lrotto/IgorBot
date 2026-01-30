@@ -3,6 +3,7 @@ const cron = require("node-cron");
 const { connectMongo } = require("./services/mongo");
 const rssController = require("./controller/rssController");
 const smeRssAdapter = require("./services/smeRssAdapter");
+require("./services/discordBot");
 require("dotenv").config();
 
 const app = express();
