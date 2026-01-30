@@ -121,7 +121,7 @@ class SmeRssAdapter {
     return await RssItem.find({
       feedId: feed._id,
       wasSent: false,
-    }).sort({ pubDate: -1 });
+    }).sort({ pubDate: 1 });
   }
 
   async markItemsAsSent(itemIds) {

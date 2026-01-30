@@ -153,6 +153,7 @@ class RssController {
     await feed.save();
 
     if (newItems.length > 0) {
+      newItems.sort((a, b) => a.pubDate - b.pubDate);
       const messageDistributor = require("../services/messageDistributor");
       await messageDistributor.sendRssItems(feed, newItems);
     }
