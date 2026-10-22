@@ -1,8 +1,2 @@
 [build]
-builder = "NIXPACKS"
-
-[build.nixpacksPlan]
-providers = ["node"]
-
-[build.nixpacksOptions]
-nodeVersion = "20"
+builder = "RAILPACK"
